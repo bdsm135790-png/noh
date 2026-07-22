@@ -21,8 +21,9 @@
 
 ### 소방 대응 (역할 기반)
 - `firefighting_drone.py` — `FirefightingDrone` 클래스: 열화상 탐지, 화점 진압,
-  화염 회피 A* 탈출 경로 안내. 소화탄 소진 시 SUPPRESSOR→GUIDE 자율 전환.
-- `firefighting_demo.py` — 탐지→진압→안내 통합 시나리오 데모
+  화염 회피 A* 탈출 경로 안내(2D/3D). 소화탄 소진 시 SUPPRESSOR→GUIDE 자율 전환.
+- `camera.py` — `CameraModel`: 핀홀 카메라 + 드론 자세로 픽셀→월드 좌표 변환.
+- `firefighting_demo.py` — 탐지→진압→안내→(픽셀변환/3D경로) 통합 시나리오 데모
 - `test_firefighting_drone.py` — 동작 검증 테스트
 
 #### 역할 (DroneRole)
@@ -41,6 +42,27 @@
 3. **임계값 기반 탐지** — 항상 `True`를 반환하던 탐지를 열화상 온도 임계값 기반으로 구현.
 4. **이동 로직 추가** — 화점 접근 로직이 없어 `dist < 3m` 투하 조건이 성립 불가능하던 문제 해결.
 5. **방어 로직 보강** — 소화탄 개수 음수 방지 및 역할 전환 안전 처리.
+
+#### 좌표계·3D 확장
+
+앞선 버전의 두 한계(2D 평면 한정, 픽셀 좌표를 월드 좌표로 그대로 사용)를 해소했다.
+
+- **픽셀→월드 변환 (`camera.py`)** — 핀홀 카메라 모델과 드론 자세(위치·요)로
+  탐지 픽셀에서 나온 광선을 지면 평면과 교차시켜 실제 월드 좌표를 복원한다.
+  카메라를 지정하지 않으면 기존처럼 픽셀 좌표를 반환하여 하위 호환을 유지한다.
+
+  ```python
+  from camera import CameraModel
+  cam = CameraModel.from_fov(image_shape=(480, 640), hfov_deg=90.0)
+  drone = FirefightingDrone("scout", camera=cam, yaw=0.0)
+  drone.pos = np.array([100.0, 60.0, 40.0])  # 고도 40m
+  result = drone.process_thermal_and_vision(thermal_frame, ground_z=0.0)
+  # result["fire"], result["survivor"] 는 월드 좌표
+  ```
+
+- **3D A* (다층 건물)** — `generate_escape_path`에 3D hazard map(shape `(Z, H, W)`)을
+  넘기면 층 간 이동(계단/개구부)을 포함한 6방향 3D A* 로 탈출 경로를 계산한다.
+  2D map(shape `(H, W)`)을 넘기면 기존 8방향 2D A* 로 동작한다.
 
 ## 원본 코드 대비 개선점
 

@@ -18,6 +18,8 @@ import heapq
 
 import numpy as np
 
+from camera import CameraModel
+
 try:  # cv2는 선택 의존성. 없으면 numpy만으로 동작한다.
     import cv2  # noqa: F401
     HAS_CV2 = True
@@ -38,30 +40,42 @@ class DroneRole:
 
 
 class FirefightingDrone:
-    def __init__(self, drone_id, role=DroneRole.SCOUT, payload=2, max_speed=5.0):
+    def __init__(self, drone_id, role=DroneRole.SCOUT, payload=2, max_speed=5.0,
+                 camera=None, yaw=0.0):
         self.id = drone_id
         self.role = role
         self.pos = np.array([0.0, 0.0, 0.0])  # [x, y, z]
         self.vel = np.array([0.0, 0.0, 0.0])
         self.payload_extinguisher = int(payload)  # 소화탄 보유 개수
         self.max_speed = float(max_speed)
+        # 자세/카메라: 있으면 픽셀 탐지 좌표를 월드 좌표로 변환한다.
+        self.yaw = float(yaw)          # 요(rad)
+        self.camera = camera           # CameraModel or None
         self.target_survivor_pos = None
         self.fire_hotspot_pos = None
 
     # ------------------------------------------------------------------
     # [1] 센서 처리
     # ------------------------------------------------------------------
-    def process_thermal_and_vision(self, thermal_frame, rgb_frame=None):
+    def process_thermal_and_vision(self, thermal_frame, rgb_frame=None,
+                                   ground_z=0.0):
         """열화상(Thermal)/RGB 분석으로 화점·요구조자를 동시 추적한다.
+
+        카메라(self.camera)가 설정돼 있으면 픽셀 좌표를 드론 자세 기반으로
+        월드 좌표(지면 z=ground_z)로 변환한다. 없으면 픽셀 좌표를 그대로 쓴다.
 
         Returns
         -------
         dict
             {"fire": coords or None, "survivor": coords or None}
         """
-        fire_detected, fire_coords = self._detect_fire_hotspot(thermal_frame)
-        survivor_detected, survivor_coords = self._detect_survivor(
+        fire_detected, fire_px = self._detect_fire_hotspot(thermal_frame)
+        survivor_detected, survivor_px = self._detect_survivor(
             thermal_frame, rgb_frame
+        )
+        fire_coords = self._pixel_to_world(fire_px, ground_z) if fire_detected else None
+        survivor_coords = (
+            self._pixel_to_world(survivor_px, ground_z) if survivor_detected else None
         )
 
         if fire_detected:
@@ -145,10 +159,25 @@ class FirefightingDrone:
         if self.target_survivor_pos is None:
             return None
 
+        hazard = np.asarray(hazard_map)
+
+        # 3D(다층 건물): shape (Z, H, W) → 층 간 이동을 포함한 3D A*.
+        if hazard.ndim == 3:
+            start_cell = self._world_to_cell_3d(self.target_survivor_pos, cell_size)
+            goal_cell = self._world_to_cell_3d(exit_pos, cell_size)
+            cell_path = self._astar_pathfinding_3d(start_cell, goal_cell, hazard)
+            if cell_path is None:
+                print(f"[Drone {self.id}] 안전 경로 없음 — 재탐색 필요")
+                return None
+            return [
+                np.array([c * cell_size, r * cell_size, z * cell_size])
+                for (z, r, c) in cell_path
+            ]
+
+        # 2D(단일 층): shape (H, W).
         start_cell = self._world_to_cell(self.target_survivor_pos, cell_size)
         goal_cell = self._world_to_cell(exit_pos, cell_size)
-
-        cell_path = self._astar_pathfinding(start_cell, goal_cell, hazard_map)
+        cell_path = self._astar_pathfinding(start_cell, goal_cell, hazard)
         if cell_path is None:
             print(f"[Drone {self.id}] 안전 경로 없음 — 재탐색 필요")
             return None
@@ -159,6 +188,26 @@ class FirefightingDrone:
         return [
             np.array([c * cell_size, r * cell_size, z]) for (r, c) in cell_path
         ]
+
+    # ------------------------------------------------------------------
+    # 픽셀 → 월드 좌표 변환
+    # ------------------------------------------------------------------
+    def _pixel_to_world(self, pixel_coords, target_z=0.0):
+        """탐지 픽셀 좌표를 월드 좌표로 변환한다.
+
+        카메라가 없으면 픽셀 좌표(=근사 월드 좌표)를 그대로 반환하여
+        하위 호환성을 유지한다.
+        """
+        if pixel_coords is None:
+            return None
+        if self.camera is None:
+            return np.asarray(pixel_coords, dtype=float)
+        u, v = float(pixel_coords[0]), float(pixel_coords[1])
+        world = self.camera.pixel_to_ground(
+            (u, v), self.pos, yaw_rad=self.yaw, target_z=target_z
+        )
+        # 광선이 평면과 만나지 않으면 픽셀 좌표로 폴백.
+        return world if world is not None else np.asarray(pixel_coords, dtype=float)
 
     # ------------------------------------------------------------------
     # 탐지 (열화상 임계값 기반)
@@ -248,6 +297,79 @@ class FirefightingDrone:
                         continue
                 step_cost = np.sqrt(2) if (dr and dc) else 1.0
                 tentative = g + step_cost
+                if tentative < g_score.get(nxt, np.inf):
+                    came_from[nxt] = current
+                    g_score[nxt] = tentative
+                    f = tentative + heuristic(nxt, goal)
+                    heapq.heappush(open_heap, (f, tentative, nxt))
+
+        return None  # 도달 불가
+
+    # ------------------------------------------------------------------
+    # A* 경로 탐색 (3D, 다층 건물)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _world_to_cell_3d(world_pos, cell_size):
+        p = np.asarray(world_pos, dtype=float)
+        # 월드 (x, y, z) → 그리드 (z=층, row=y, col=x)
+        col = int(round(p[0] / cell_size))
+        row = int(round(p[1] / cell_size))
+        z = int(round(p[2] / cell_size)) if p.shape[0] > 2 else 0
+        return (z, row, col)
+
+    @staticmethod
+    def _astar_pathfinding_3d(start, goal, hazard_map):
+        """6방향 3D A*(상하 층 이동 + 평면 4방향). 값>0인 셀은 통과 불가.
+
+        층 간 이동(계단/개구부)은 hazard가 0인 셀이 위아래로 이어질 때만 가능.
+
+        Returns
+        -------
+        list[tuple[int, int, int]] or None
+            (z, row, col) 셀 경로. 경로 없으면 None.
+        """
+        grid = np.asarray(hazard_map)
+        nz, h, w = grid.shape
+
+        def passable(cell):
+            z, r, c = cell
+            return (0 <= z < nz and 0 <= r < h and 0 <= c < w
+                    and grid[z, r, c] <= 0)
+
+        if not passable(start) or not passable(goal):
+            return None
+
+        def heuristic(a, b):
+            # 대각 이동을 쓰지 않으므로 맨해튼 거리.
+            return abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])
+
+        # 상/하 층 + 평면 상하좌우 (모서리 파고들기 문제 없음).
+        moves = [(0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1),
+                 (-1, 0, 0), (1, 0, 0)]
+
+        open_heap = [(heuristic(start, goal), 0.0, start)]
+        came_from = {}
+        g_score = {start: 0.0}
+        closed = set()
+
+        while open_heap:
+            _, g, current = heapq.heappop(open_heap)
+            if current == goal:
+                path = [current]
+                while current in came_from:
+                    current = came_from[current]
+                    path.append(current)
+                path.reverse()
+                return path
+            if current in closed:
+                continue
+            closed.add(current)
+
+            for dz, dr, dc in moves:
+                nxt = (current[0] + dz, current[1] + dr, current[2] + dc)
+                if not passable(nxt) or nxt in closed:
+                    continue
+                tentative = g + 1.0
                 if tentative < g_score.get(nxt, np.inf):
                     came_from[nxt] = current
                     g_score[nxt] = tentative
