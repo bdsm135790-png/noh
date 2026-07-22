@@ -14,9 +14,33 @@
 
 ## 구성
 
+### 군집 비행 (Boids)
 - `swarm_drone.py` — `SwarmDrone` 클래스 (핵심 로직)
 - `simulate.py` — 군집 시뮬레이션 데모
 - `test_swarm_drone.py` — 동작 검증 테스트
+
+### 소방 대응 (역할 기반)
+- `firefighting_drone.py` — `FirefightingDrone` 클래스: 열화상 탐지, 화점 진압,
+  화염 회피 A* 탈출 경로 안내. 소화탄 소진 시 SUPPRESSOR→GUIDE 자율 전환.
+- `firefighting_demo.py` — 탐지→진압→안내 통합 시나리오 데모
+- `test_firefighting_drone.py` — 동작 검증 테스트
+
+#### 역할 (DroneRole)
+
+| 역할 | 임무 |
+|------|------|
+| `SCOUT` | 수색 및 경로 탐색 |
+| `SUPPRESSOR` | 화점 초동 진압(소화탄 투하로 시간 확보) |
+| `GUIDE` | 요구조자 탈출 안내 및 보호 |
+
+#### 원본 소방 드론 프로토타입 대비 개선점
+
+1. **`cv2` 하드 의존 제거** — 미설치·미사용이던 `import cv2`가 모듈 임포트 자체를
+   실패시키던 문제 해결(있으면 사용, 없어도 동작).
+2. **A* 실제 구현** — 고정 웨이포인트만 반환하던 스텁을 8방향 화염 회피 A* 로 교체.
+3. **임계값 기반 탐지** — 항상 `True`를 반환하던 탐지를 열화상 온도 임계값 기반으로 구현.
+4. **이동 로직 추가** — 화점 접근 로직이 없어 `dist < 3m` 투하 조건이 성립 불가능하던 문제 해결.
+5. **방어 로직 보강** — 소화탄 개수 음수 방지 및 역할 전환 안전 처리.
 
 ## 원본 코드 대비 개선점
 
@@ -47,6 +71,10 @@ print(a)
 
 ```bash
 pip install numpy
-python3 simulate.py          # 시뮬레이션 데모
-python3 test_swarm_drone.py  # 테스트
+# 군집 비행
+python3 simulate.py               # 시뮬레이션 데모
+python3 test_swarm_drone.py       # 테스트
+# 소방 대응
+python3 firefighting_demo.py      # 시나리오 데모
+python3 test_firefighting_drone.py  # 테스트
 ```
