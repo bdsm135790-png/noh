@@ -25,6 +25,7 @@
   화염 회피 A* 탈출 경로 안내(2D/3D). 소화탄 소진 시 SUPPRESSOR→GUIDE 자율 전환.
 - `camera.py` — `CameraModel`: 핀홀 카메라 + 드론 자세로 픽셀→월드 좌표 변환.
 - `firefighting_demo.py` — 탐지→진압→안내→(픽셀변환/3D경로) 통합 시나리오 데모
+- `visualize_firefighting.py` — 진압·탈출 시나리오를 2D 애니메이션(GIF)으로 렌더링
 - `test_firefighting_drone.py` — 동작 검증 테스트
 
 #### 역할 (DroneRole)
@@ -99,6 +100,7 @@ python3 simulate.py               # 시뮬레이션 데모(콘솔)
 python3 visualize_swarm.py        # 3D 애니메이션 렌더링 -> swarm.gif
 python3 test_swarm_drone.py       # 테스트
 # 소방 대응
-python3 firefighting_demo.py      # 시나리오 데모
+python3 firefighting_demo.py      # 시나리오 데모(콘솔)
+python3 visualize_firefighting.py # 시나리오 애니메이션 -> firefighting.gif
 python3 test_firefighting_drone.py  # 테스트
 ```
