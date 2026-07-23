@@ -30,11 +30,13 @@ from firefighting_drone import FirefightingDrone, DroneRole
 
 
 # 임무 지형(월드 좌표, m) -------------------------------------------------
-GOAL_APPROACH = np.array([40.0, 40.0, 8.0])   # 현장 상공 집결점
-LOITER = np.array([40.0, 40.0, 9.0])          # 선회 대기 지점
+GOAL_APPROACH = np.array([38.0, 38.0, 8.0])   # 현장 상공 집결점
+# 선회 대기 지점은 화점에서 떨어진 남서쪽 표준대기(standoff) 지점.
+# PATROL이 화점 위에 겹쳐 보이지 않도록 링 대형으로 분산한다.
+LOITER = np.array([22.0, 24.0, 11.0])
 FIRE = np.array([41.0, 39.0, 2.0])            # 화점(3D)
-SURVIVOR = np.array([36.0, 44.0, 0.0])        # 요구조자(지상)
-EXIT = np.array([50.0, 50.0, 0.0])            # 비상구
+SURVIVOR = np.array([34.0, 46.0, 0.0])        # 요구조자(지상)
+EXIT = np.array([52.0, 52.0, 0.0])            # 비상구
 
 
 def make_scene_hazard(shape=(60, 60)):
@@ -66,8 +68,12 @@ class MissionDrone:
         # GUIDE 호위 상태.
         self.escape_path = None
         self.escape_idx = 0
+        # 개체 식별용 짧은 라벨(예: Su1, P2). build_fleet에서 지정.
+        self.label = str(drone_id)
         # SUPPRESSOR가 화점을 공격하는 상대 위치(기체끼리 겹치지 않도록).
         self.attack_offset = np.zeros(3)
+        # 선회 시 링 대형에서 자신이 맡는 상대 위치(기체끼리 겹치지 않도록).
+        self.loiter_offset = np.zeros(3)
 
     # -- 편대 비행(Boids) : SwarmDrone에 위임 ---------------------------
     def _swarm_body(self):
@@ -137,13 +143,29 @@ def build_fleet():
               + [DroneRole.SUPPRESSOR] * 2
               + [DroneRole.GUIDE]
               + ["PATROL"] * 4)
+    short = {DroneRole.SCOUT: "Sc", DroneRole.SUPPRESSOR: "Su",
+             DroneRole.GUIDE: "G", "PATROL": "P"}
+    n = len(roster)
     fleet = []
     supp_seen = 0
+    role_count = {}
     for i, role in enumerate(roster):
         pos = rng.uniform(-6, 10, size=3) + np.array([0, 0, 8.0])
         vel = rng.uniform(-1, 1, size=3)
         payload = 2 if role == DroneRole.SUPPRESSOR else 0
         drone = MissionDrone(f"{role[:4]}-{i}", role, pos, vel, payload=payload)
+
+        # 개체 식별 라벨(같은 역할이 여럿이면 번호를 붙인다): Sc, Su1, Su2, G, P1..
+        tag = short.get(role, role[:2])
+        role_count[role] = role_count.get(role, 0) + 1
+        multiple = roster.count(role) > 1
+        drone.label = f"{tag}{role_count[role]}" if multiple else tag
+
+        # 선회 시 링 대형 위치(전 기체가 겹치지 않게 원주에 고르게 배치).
+        ang = 2 * np.pi * i / n
+        drone.loiter_offset = np.array([6.5 * np.cos(ang),
+                                        6.5 * np.sin(ang), 0.0])
+
         if role == DroneRole.SUPPRESSOR:
             # 진압 드론끼리 화점을 서로 다른 방향에서 공략하도록 표적을 분산.
             angle = supp_seen * (2 * np.pi / 2) + np.pi / 4
@@ -163,7 +185,7 @@ def min_pairwise_distance(fleet):
     return best
 
 
-def run_mission(approach_steps=40, onscene_steps=60, dt=0.5, record=True):
+def run_mission(approach_steps=38, onscene_steps=28, dt=0.5, record=True):
     """통합 임무를 시뮬레이션한다.
 
     Returns
@@ -180,9 +202,16 @@ def run_mission(approach_steps=40, onscene_steps=60, dt=0.5, record=True):
     survivor_track = [None]
     events = []
     min_dist_series = [min_pairwise_distance(fleet)]
+    # 프레임별 상태(내레이션/진행 표시용).
+    frame_status = [{"phase": "launch",
+                     "headline": "Launch: fleet forming up at base",
+                     "supp_active": 2, "supp_payload": 4,
+                     "wp": 0, "wp_total": 0, "detected": False,
+                     "survivor_out": False}]
 
     detected = False
     escape_planned = False
+    supp_ids = [d.id for d in fleet if d.role == DroneRole.SUPPRESSOR]
     scout = next(d for d in fleet if d.role == DroneRole.SCOUT)
 
     total = approach_steps + onscene_steps
@@ -215,8 +244,11 @@ def run_mission(approach_steps=40, onscene_steps=60, dt=0.5, record=True):
             neighbors = [o for o in fleet if o is not d]
 
             if not on_scene:
-                # 접근: 전원 편대 비행으로 집결점 이동.
-                d.flock_step(neighbors, GOAL_APPROACH, dt=dt)
+                # 접근: 한 점이 아니라 각자 편대 대형 위치를 목표로 이동해
+                # 뭉치지 않고 진형을 갖춘 채 집결한다. 자리를 잡느라 서로
+                # 스칠 때 충분히 벌어지도록 분리 여유(safe_dist)를 크게 준다.
+                d.flock_step(neighbors, GOAL_APPROACH + d.loiter_offset,
+                             dt=dt, safe_dist=5.5, goal_w=0.55)
             else:
                 if d.role == DroneRole.SUPPRESSOR:
                     dropped = d.suppress_step(FIRE + d.attack_offset)
@@ -227,8 +259,10 @@ def run_mission(approach_steps=40, onscene_steps=60, dt=0.5, record=True):
                 elif d.role == DroneRole.GUIDE and d.escape_path is not None:
                     survivor_pos = d.escort_step(dt=1.0)
                 else:
-                    # PATROL / SCOUT / (전환된 GUIDE) : 현장 상공 선회.
-                    d.flock_step(neighbors, LOITER, dt=dt, goal_w=0.4)
+                    # PATROL / SCOUT / (전환된 GUIDE) : 현장에서 떨어진
+                    # 표준대기 지점 상공을 각자 다른 링 위치로 선회.
+                    d.flock_step(neighbors, LOITER + d.loiter_offset,
+                                 dt=dt, goal_w=0.5)
 
         if record:
             for d in fleet:
@@ -238,12 +272,45 @@ def run_mission(approach_steps=40, onscene_steps=60, dt=0.5, record=True):
                                   if survivor_pos is not None else None)
             min_dist_series.append(min_pairwise_distance(fleet))
 
+            # --- 프레임 상태 요약 ---
+            by_id = {d.id: d for d in fleet}
+            supp_active = sum(1 for i in supp_ids
+                              if by_id[i].role == DroneRole.SUPPRESSOR)
+            supp_payload = sum(by_id[i].payload for i in supp_ids)
+            guide = next((d for d in fleet if d.escape_path is not None), None)
+            wp = guide.escape_idx if guide else 0
+            wp_total = len(guide.escape_path) if guide is not None else 0
+            survivor_out = bool(wp_total and wp >= wp_total - 1
+                                and survivor_pos is not None)
+
+            if not on_scene:
+                phase, headline = "approach", \
+                    "Approaching the scene together in Boids formation"
+            elif supp_active > 0:
+                phase, headline = "suppress", \
+                    f"SUPPRESSORs attacking the fire ({supp_payload} extinguishers left)"
+            elif wp_total and not survivor_out:
+                phase, headline = "escort", \
+                    f"GUIDE escorting the survivor to exit (waypoint {wp}/{wp_total - 1})"
+            else:
+                phase, headline = "clear", \
+                    "Survivor reached the exit — area secured"
+
+            frame_status.append({
+                "phase": phase, "headline": headline,
+                "supp_active": supp_active, "supp_payload": supp_payload,
+                "wp": wp, "wp_total": wp_total, "detected": detected,
+                "survivor_out": survivor_out,
+            })
+
     return {
         "fleet": fleet,
         "positions": {k: np.array(v) for k, v in positions.items()},
         "roles": roles,
         "survivor_track": survivor_track,
         "events": events,
+        "frame_status": frame_status,
+        "labels": {d.id: d.label for d in fleet},
         "min_dist_series": np.array(min_dist_series),
         "approach_steps": approach_steps,
         "hazard": hazard,
