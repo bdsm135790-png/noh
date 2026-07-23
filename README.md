@@ -16,7 +16,8 @@
 
 ### 군집 비행 (Boids)
 - `swarm_drone.py` — `SwarmDrone` 클래스 (핵심 로직)
-- `simulate.py` — 군집 시뮬레이션 데모
+- `simulate.py` — 군집 시뮬레이션 데모 (콘솔 지표 출력)
+- `visualize_swarm.py` — 군집 비행을 3D 애니메이션(GIF)으로 렌더링
 - `test_swarm_drone.py` — 동작 검증 테스트
 
 ### 소방 대응 (역할 기반)
@@ -94,7 +95,8 @@ print(a)
 ```bash
 pip install numpy
 # 군집 비행
-python3 simulate.py               # 시뮬레이션 데모
+python3 simulate.py               # 시뮬레이션 데모(콘솔)
+python3 visualize_swarm.py        # 3D 애니메이션 렌더링 -> swarm.gif
 python3 test_swarm_drone.py       # 테스트
 # 소방 대응
 python3 firefighting_demo.py      # 시나리오 데모
