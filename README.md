@@ -29,6 +29,13 @@
 - `visualize_firefighting_3d.py` — 3D 비행 진압 + 다층(층간) 탈출을 3D 애니메이션으로 렌더링
 - `test_firefighting_drone.py` — 동작 검증 테스트
 
+### 통합 임무 (스웜 + 소방 협력)
+- `integrated_mission.py` — 여러 드론이 **동시에 협력**하는 통합 시나리오.
+  전 기체가 Boids 편대(`SwarmDrone`)로 현장에 접근한 뒤, 역할(`FirefightingDrone`)에
+  따라 진압/호위/선회를 분담한다. 두 클래스에 로직을 **위임(delegate)** 하여 재사용.
+- `visualize_integrated.py` — 통합 임무를 역할별 색상으로 3D 애니메이션 렌더링
+- `test_integrated_mission.py` — 무충돌·편대 수렴·역할 전환·경로 안전성 검증
+
 #### 역할 (DroneRole)
 
 | 역할 | 임무 |
@@ -105,4 +112,8 @@ python3 firefighting_demo.py      # 시나리오 데모(콘솔)
 python3 visualize_firefighting.py # 2D 시나리오 애니메이션 -> firefighting.gif
 python3 visualize_firefighting_3d.py # 3D 비행·층간 탈출 -> firefighting_3d.gif
 python3 test_firefighting_drone.py  # 테스트
+# 통합 임무 (스웜 + 소방)
+python3 integrated_mission.py     # 통합 시나리오 콘솔 요약
+python3 visualize_integrated.py   # 통합 임무 3D 애니메이션 -> integrated_mission.gif
+python3 test_integrated_mission.py  # 테스트
 ```
