@@ -26,6 +26,7 @@
 - `camera.py` — `CameraModel`: 핀홀 카메라 + 드론 자세로 픽셀→월드 좌표 변환.
 - `firefighting_demo.py` — 탐지→진압→안내→(픽셀변환/3D경로) 통합 시나리오 데모
 - `visualize_firefighting.py` — 진압·탈출 시나리오를 2D 애니메이션(GIF)으로 렌더링
+- `visualize_firefighting_3d.py` — 3D 비행 진압 + 다층(층간) 탈출을 3D 애니메이션으로 렌더링
 - `test_firefighting_drone.py` — 동작 검증 테스트
 
 #### 역할 (DroneRole)
@@ -101,6 +102,7 @@ python3 visualize_swarm.py        # 3D 애니메이션 렌더링 -> swarm.gif
 python3 test_swarm_drone.py       # 테스트
 # 소방 대응
 python3 firefighting_demo.py      # 시나리오 데모(콘솔)
-python3 visualize_firefighting.py # 시나리오 애니메이션 -> firefighting.gif
+python3 visualize_firefighting.py # 2D 시나리오 애니메이션 -> firefighting.gif
+python3 visualize_firefighting_3d.py # 3D 비행·층간 탈출 -> firefighting_3d.gif
 python3 test_firefighting_drone.py  # 테스트
 ```
