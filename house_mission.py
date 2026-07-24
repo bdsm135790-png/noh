@@ -60,13 +60,13 @@ def run_house_mission():
     center = np.array([h.W / 2, h.D / 2, 0])
     pad = h.pad
 
-    gcs = _unit(Squad.GCS, "GCS", pad + [2, 2, 1])
-    recon_a = _unit(Squad.RECON, "정찰-A", pad + [0, 1, 1], battery=42.0)
-    recon_b = _unit(Squad.RECON, "정찰-B(예비)", pad + [1, 0, 1],
+    gcs = _unit(Squad.GCS, "GCS", pad + [3.5, 3.5, 1])
+    recon_a = _unit(Squad.RECON, "정찰-A", pad + [0, 2, 1], battery=42.0)
+    recon_b = _unit(Squad.RECON, "정찰-B(예비)", pad + [2.5, 0, 1],
                     battery=100.0, state="spare")
-    sar = _unit(Squad.SAR, "수색구조", pad + [-1, 1, 1])
-    sup = _unit(Squad.SUPPRESSION, "진압", pad + [-1, 0, 1])
-    comms = _unit(Squad.COMMS, "통신조명", pad + [0, -1, 1])
+    sar = _unit(Squad.SAR, "수색구조", pad + [-2.5, 2, 1])
+    sup = _unit(Squad.SUPPRESSION, "진압", pad + [-2.5, -1, 1])
+    comms = _unit(Squad.COMMS, "통신조명", pad + [0, -2.5, 1])
     units = [gcs, recon_a, recon_b, sar, sup, comms]
 
     # 요구조자 대피 경로(침실→현관→집 밖 집결지).
@@ -92,7 +92,7 @@ def run_house_mission():
     for step in range(1, total + 1):
         goals = {}
         # 지휘부는 패드 지휘소 고정.
-        goals["GCS"] = pad + [2, 2, 1.5]
+        goals["GCS"] = pad + [3.5, 3.5, 1.5]
 
         # 기본 단계 판정.
         if step <= Td:
@@ -145,17 +145,17 @@ def run_house_mission():
             goals["수색구조"] = h.windows["bed1"] + [0, 0, 0]
             # 정찰: 순회 감시(릴레이 중이면 A는 복귀).
             if recon_a.state == "rth":
-                goals["정찰-A"] = pad + [0, 1, sop.rth_altitude(Squad.RECON) / 10]
+                goals["정찰-A"] = pad + [0, 2, sop.rth_altitude(Squad.RECON) / 10]
                 if np.linalg.norm(recon_a.pos[:2] - pad[:2]) < 2.0:
                     recon_a.state = "ground"; relay_done = True
             else:
                 goals["정찰-A"] = recon_post
             goals["정찰-B(예비)"] = recon_post if recon_b.state == "active" \
-                else pad + [1, 0, 1]
+                else pad + [2.5, 0, 1]
             goals["통신조명"] = center + [0, 0, Z + 4]
         else:  # clear
             head = "화점 진압·요구조자 대피 완료 — 편대 감시 유지/RTH"
-            goals["정찰-A"] = pad + [0, 1, 1] if recon_a.state == "ground" \
+            goals["정찰-A"] = pad + [0, 2, 1] if recon_a.state == "ground" \
                 else recon_post
             goals["정찰-B(예비)"] = recon_post
             goals["수색구조"] = h.exit + [0, -1, Z - 2]
