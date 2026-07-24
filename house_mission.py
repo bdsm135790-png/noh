@@ -119,6 +119,20 @@ def run_house_mission():
         ang = 0.6 * step
         recon_post = _perimeter(center, 11.0, ang, Z)
 
+        # ---- 요구조자 이동(구조 착수 후) — 목표 배정 전에 미리 계산 ----
+        victim_pos = None
+        op_start = Td + Ta
+        if step > op_start + 6:   # 키트 투하·안내 시작 후
+            prog = np.clip((step - op_start - 6) / (To + Tc - 6), 0, 1)
+            seg = prog * (len(vic_path) - 1)
+            i = int(np.floor(seg)); frac = seg - i
+            i = min(i, len(vic_path) - 2)
+            victim_pos = vic_path[i] * (1 - frac) + vic_path[i + 1] * frac
+            # 진행 방향(요구조자가 나아갈 다음 지점).
+            vic_heading = vic_path[i + 1] - vic_path[i]
+            vn = np.linalg.norm(vic_heading[:2])
+            vic_heading = (vic_heading / vn) if vn > 1e-6 else np.zeros(3)
+
         # ---- 단계별 목표 배정 ----
         if phase == "deploy":
             head = "GCS 공중지휘권 확립 — 편대 이륙·현장 전개"
@@ -141,8 +155,12 @@ def run_house_mission():
                 drops += 1
                 last_drop = step
                 fire_level = max(0.0, fire_level - 0.34)
-            # 수색구조: 침실 창 접근 후 요구조자 대피 유도.
-            goals["수색구조"] = h.windows["bed1"] + [0, 0, 0]
+            # 수색구조: 요구조자 접촉 전엔 침실 창 접근, 이후엔 요구조자 바로
+            # 앞·위에서 함께 이동하며 대피로를 인도(escort)한다.
+            if victim_pos is not None:
+                goals["수색구조"] = victim_pos + vic_heading * 1.5 + [0, 0, 3.0]
+            else:
+                goals["수색구조"] = h.windows["bed1"] + [0, 0, 0]
             # 정찰: 순회 감시(릴레이 중이면 A는 복귀).
             if recon_a.state == "rth":
                 goals["정찰-A"] = pad + [0, 2, sop.rth_altitude(Squad.RECON) / 10]
@@ -158,19 +176,13 @@ def run_house_mission():
             goals["정찰-A"] = pad + [0, 2, 1] if recon_a.state == "ground" \
                 else recon_post
             goals["정찰-B(예비)"] = recon_post
-            goals["수색구조"] = h.exit + [0, -1, Z - 2]
+            # 대피 완료 전까지 요구조자를 계속 앞에서 인도, 이후 집결지 상공.
+            if victim_pos is not None:
+                goals["수색구조"] = victim_pos + vic_heading * 1.5 + [0, 0, 3.0]
+            else:
+                goals["수색구조"] = h.exit + [0, -1, Z - 2]
             goals["진압"] = h.windows["kitchen"] + [0, -2, 2]
             goals["통신조명"] = center + [0, 0, Z + 4]
-
-        # ---- 요구조자 이동(구조 착수 후) ----
-        victim_pos = None
-        op_start = Td + Ta
-        if step > op_start + 6:   # 키트 투하·안내 시작 후
-            prog = np.clip((step - op_start - 6) / (To + Tc - 6), 0, 1)
-            seg = prog * (len(vic_path) - 1)
-            i = int(np.floor(seg)); frac = seg - i
-            i = min(i, len(vic_path) - 2)
-            victim_pos = vic_path[i] * (1 - frac) + vic_path[i + 1] * frac
 
         md = _step(units, goals, h)
         for u in units:
