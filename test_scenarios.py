@@ -23,15 +23,17 @@ def test_all_scenarios_run_and_are_collision_free():
 
 def test_every_role_has_a_distinct_icon():
     """제7조제4항(역할 식별): 역할마다 아이콘·색이 지정돼 있다."""
-    seen_paths = 0
     colors = set()
     for role, (path, color, name, tag) in ICONS.items():
-        assert path is not None
+        assert path is not None and color and name and tag
         colors.add(color)
-        seen_paths += 1
-    assert seen_paths == len(ICONS)
-    # 색이 충분히 구분된다(대부분 고유).
-    assert len(colors) >= len(ICONS) - 1
+    # 시나리오에서 실제로 쓰는 핵심 역할들은 색이 서로 구분된다.
+    core = [role_icon(r)[1] for r in
+            (Role.COMMANDER, Role.SAFETY, Role.SCOUT, Role.SUPPRESSOR,
+             Role.GUIDE, Role.RIT, Role.HAZMAT)]
+    assert len(set(core)) == len(core)
+    # 전체적으로도 충분히 다양한 색을 쓴다(편대는 역할 색을 재사용).
+    assert len(colors) >= 8
 
 
 def test_doctrine_guidelines_have_article_refs():

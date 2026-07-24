@@ -89,6 +89,16 @@ def _hexagon():
     return _poly(_circle(0, 0, 0.95, n=6))
 
 
+def _beacon(n=12):
+    """햇살(비콘) — 통신중계·조명(신호/빛 방사)."""
+    pts = []
+    for k in range(2 * n):
+        ang = np.pi / 2 + k * np.pi / n
+        r = 0.95 if k % 2 == 0 else 0.5
+        pts.append((r * np.cos(ang), r * np.sin(ang)))
+    return _poly(pts)
+
+
 def _person():
     """사람 — 요구조자(머리 원 + 사다리꼴 몸통, 두 서브패스)."""
     head = _circle(0.0, 0.58, 0.34, n=20)
@@ -112,6 +122,12 @@ ICONS = {
     Role.HAZMAT: (_hexagon(), "#16a34a", "유해물 HAZMAT", "HZM"),
     Role.OVERWATCH: (_shield(), "#0d9488", "경계 OVERWATCH", "OWatch"),
     Role.MEDIC: (_cross(), "#db2777", "구급 MEDIC", "MED"),
+    # SOP-D 4편대(squadron) — sop_doctrine.Squad 문자열과 동일 키.
+    "GCS": (_star(), "#111827", "GCS 지휘통제", "GCS"),
+    "RECON": (_eye(), "#7c3aed", "1편대 공중정찰대", "정찰"),
+    "SAR": (_arrow(), "#0ea5e9", "2편대 인명수색·구조대", "수색구조"),
+    "SUPPRESSION": (_drop(), "#2563eb", "3편대 화재진압대", "진압"),
+    "COMMS": (_beacon(), "#f59e0b", "4편대 통신중계·조명대", "통신조명"),
 }
 
 # 요구조자/조난자 등 비-드론 개체.

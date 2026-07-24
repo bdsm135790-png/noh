@@ -61,6 +61,23 @@
   역할 아이콘, 실시간 내레이션, **적용 중인 지침과 근거 조항**, 역할 범례, 진행 타임라인.
 - `test_scenarios.py` — 무충돌, 아이콘/지침 정합성, 대피·RIT·플룸 등 단계 발생 검증.
 
+### 드론 군집 SOP-D + 가정집 3D 미션 (장애물·실시간 담당)
+「드론 군집체계 재난현장 표준작전절차(SOP-D, 2026)」변형판을 코드화하고,
+**장애물이 있는 가정집 화재**에 4편대 군집을 3D로 투입한다.
+
+- `sop_doctrine.py` — SOP-D 코드화: **4편대 편성**(1정찰/2수색구조/3진압/4통신조명)+GCS,
+  **SOP 103-D 무중단 배터리 릴레이**(25% 경보→예비기 전진·임무 이양→RTH),
+  **SOP 109-D 편대별 다단계 복귀고도**(50/70/90/110m),
+  **SSG-D 100 Fail-Safe**(3m 반발 자율회피 `repulsive_avoidance`), 편대별 실시간 임무 문구.
+- `house_scene.py` — **가정집 3D 장애물**: 외벽/내벽(방 5칸)/지붕/가구를 3D 박스로 모델링.
+  `repel()`로 벽·가구를 피해 비행(창문 접근 또는 벽 위 통과).
+- `house_mission.py` — 가정집 화재 SOP-D 미션: 전개→3D 스캐닝 탐지→진압/구조/정찰/통신
+  동시 대응→**배터리 릴레이**→종결. 프레임마다 **편대별 실시간 담당 임무·배터리·상태** 기록.
+- `visualize_house.py` — 3D 렌더러: 가정집·장애물·역할 아이콘 + 회전 뷰 +
+  **실시간 편대 상태표**(현재 임무/근거 SOP/배터리 바) + 진행 타임라인.
+- `test_house_mission.py` — 복귀고도 다단계, 배터리 릴레이 발생, 무충돌, 실시간 임무 기록,
+  화점 진압 검증.
+
 #### 역할 (DroneRole)
 
 | 역할 | 임무 |
@@ -146,4 +163,8 @@ python3 scenarios.py              # 5개 시나리오 콘솔 요약
 python3 visualize_scenarios.py    # 5개 GIF 모두 생성(scenario_*.gif)
 python3 visualize_scenarios.py rescue mayday  # 특정 시나리오만
 python3 test_scenarios.py         # 테스트
+# 드론 군집 SOP-D + 가정집 3D 미션
+python3 house_mission.py          # 미션 콘솔 요약
+python3 visualize_house.py        # 3D 미션 애니메이션 -> house_mission.gif
+python3 test_house_mission.py     # 테스트
 ```
