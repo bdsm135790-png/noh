@@ -36,6 +36,31 @@
 - `visualize_integrated.py` — 통합 임무를 역할별 색상으로 3D 애니메이션 렌더링
 - `test_integrated_mission.py` — 무충돌·편대 수렴·역할 전환·경로 안전성 검증
 
+### 표준 절차 기반 5대 시나리오 (행동 지침 적용)
+「소방공무원 현장 소방활동 안전관리에 관한 규정」(소방청훈령 제119호, 2020)의
+현장 안전관리 원칙을 **드론 편대의 활동 지침**으로 변형해 코드에 적용했다.
+
+- `firefighting_doctrine.py` — 규정 조항을 드론 지침으로 코드화(근거 조항 포함).
+  안전최우선(제3조14호), 위험요인 관측·전파(제7조), 역할 식별(제7조④),
+  대원 관리체계(제24조), 위험 시 중지·대피(제25조), 사고대원 우선(제25조③),
+  신속동료구조팀(제24조②) 등. 위험도별 안전 이격/대피 판단 등 **행동에 영향**을 주는 헬퍼 포함.
+- `drone_icons.py` — 역할을 형태로 보여주는 벡터 아이콘(제7조④ 식별 취지):
+  진압=물방울, 정찰=눈, 안내=화살표, 경계=방패, 안전=경고삼각, 구조/구급=십자,
+  지휘=별, 유해물=육각형.
+- `scenarios.py` — 5대 케이스 시뮬레이션(이동/충돌회피는 기존 클래스 재사용):
+
+  | 케이스 | 흐름 | 핵심 근거 |
+  |--------|------|-----------|
+  | ① 인명구조 `rescue` | 수색→발견→응급→호위 탈출 | 제7·24·25조 |
+  | ② 화재 초기대응 `suppress` | 사이즈업→초동 진압→잔불정리 | 제3·7조 |
+  | ③ 플래시오버 경계·대피 `flashover` | 작업→위험징후→활동중지·대피→인원확인 | **제25조** |
+  | ④ 대원 조난·신속동료구조 `mayday` | 진압→MAYDAY→RIT 전개→구출 | **제24·25조** |
+  | ⑤ 유해가스 누출 `hazmat` | 플룸 매핑→경계구역→풍상 대피/구조 | **제7·26조** |
+
+- `visualize_scenarios.py` — 5개 시나리오를 한 렌더러로 GIF화(한글 지침 패널 포함):
+  역할 아이콘, 실시간 내레이션, **적용 중인 지침과 근거 조항**, 역할 범례, 진행 타임라인.
+- `test_scenarios.py` — 무충돌, 아이콘/지침 정합성, 대피·RIT·플룸 등 단계 발생 검증.
+
 #### 역할 (DroneRole)
 
 | 역할 | 임무 |
@@ -116,4 +141,9 @@ python3 test_firefighting_drone.py  # 테스트
 python3 integrated_mission.py     # 통합 시나리오 콘솔 요약
 python3 visualize_integrated.py   # 통합 임무 3D 애니메이션 -> integrated_mission.gif
 python3 test_integrated_mission.py  # 테스트
+# 표준 절차 기반 5대 시나리오
+python3 scenarios.py              # 5개 시나리오 콘솔 요약
+python3 visualize_scenarios.py    # 5개 GIF 모두 생성(scenario_*.gif)
+python3 visualize_scenarios.py rescue mayday  # 특정 시나리오만
+python3 test_scenarios.py         # 테스트
 ```
