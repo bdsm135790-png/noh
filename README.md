@@ -26,6 +26,33 @@
 - `firefighting_demo.py` — 탐지→진압→안내→(픽셀변환/3D경로) 통합 시나리오 데모
 - `test_firefighting_drone.py` — 동작 검증 테스트
 
+### 실시간 기상정보
+- `weather.py` — `get_weather()` / `WeatherInfo`: 지명 또는 좌표로 현재 날씨를
+  실시간 조회하고 소방 관점의 **화재기상 위험도**를 산출한다. 무료·무인증
+  Open-Meteo API를 표준 라이브러리(`urllib`)로만 호출한다(추가 의존성 없음).
+- `test_weather.py` — 네트워크 없이 파싱·위험도 로직 검증(HTTP 계층 mock).
+
+바람·기온·습도는 화재 확산과 드론 비행 안전을 좌우하므로, 출동 판단·비행
+계획에 실시간 기상을 반영할 수 있다.
+
+```python
+from weather import get_weather
+
+w = get_weather("서울")                 # 지명으로 조회
+print(w.summary())
+# [서울] 맑음 · 기온 31.2°C · 습도 28% · 바람 남서 6.5 m/s · 강수 0.0 mm · 화재위험 위험(78.3) · 관측 ...
+
+w.temperature, w.humidity, w.wind_speed, w.wind_direction  # 개별 값
+w.wind_cardinal                          # 풍향 한글 8방위 ("남서")
+w.fire_weather_risk()                    # ("위험", 78.3) 등급·점수
+
+w2 = get_weather(lat=37.57, lon=126.98)  # 좌표로 조회
+```
+
+```bash
+python3 weather.py 서울   # CLI: 지명의 현재 기상 요약 출력
+```
+
 #### 역할 (DroneRole)
 
 | 역할 | 임무 |
@@ -99,4 +126,7 @@ python3 test_swarm_drone.py       # 테스트
 # 소방 대응
 python3 firefighting_demo.py      # 시나리오 데모
 python3 test_firefighting_drone.py  # 테스트
+# 실시간 기상 (추가 패키지 불필요)
+python3 weather.py 서울           # 현재 기상 요약
+python3 test_weather.py           # 테스트 (네트워크 없이 실행)
 ```
