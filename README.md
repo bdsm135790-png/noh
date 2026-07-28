@@ -32,6 +32,16 @@
   Open-Meteo API를 표준 라이브러리(`urllib`)로만 호출한다(추가 의존성 없음).
 - `test_weather.py` — 네트워크 없이 파싱·위험도 로직 검증(HTTP 계층 mock).
 
+- `weather_ops.py` — 기상정보를 **출동/비행 로직에 연동**한다.
+  - `assess_dispatch(info)` → 풍속(비행 안전)과 화재기상 위험도(긴급도)를 결합해
+    **GO / CAUTION / NO_GO** 판단 + 우선순위·투입 진압 드론 수 권고.
+  - `apply_to_swarm()` / `apply_flight_limits()` → 강풍일수록 최대 속력을 낮추고
+    안전 유지 거리를 넓혀 돌풍 드리프트 충돌을 예방(원래 값 기준 재계산이라
+    기상 갱신마다 호출해도 누적되지 않음).
+  - `compensate_velocity_for_wind()` → 지상 궤적 유지를 위한 풍향 드리프트 보정.
+- `weather_ops_demo.py` — 실시간 기상→출동 판단→군집/소방 드론 비행 반영 데모.
+- `test_weather_ops.py` — 판단·보정 로직 검증(네트워크 불필요).
+
 바람·기온·습도는 화재 확산과 드론 비행 안전을 좌우하므로, 출동 판단·비행
 계획에 실시간 기상을 반영할 수 있다.
 
@@ -47,6 +57,21 @@ w.wind_cardinal                          # 풍향 한글 8방위 ("남서")
 w.fire_weather_risk()                    # ("위험", 78.3) 등급·점수
 
 w2 = get_weather(lat=37.57, lon=126.98)  # 좌표로 조회
+```
+
+```python
+# 기상 → 출동/비행 연동
+from weather import get_weather
+from weather_ops import assess_dispatch, apply_to_swarm
+
+info = get_weather("서울")
+decision = assess_dispatch(info)
+print(decision.summary())          # GO/CAUTION/NO_GO, 우선순위, 진압 드론 수 권고
+
+if decision.can_fly:
+    params = apply_to_swarm(swarm, decision, base_safe_dist=5.0)
+    for d in swarm:
+        d.update_swarm_behavior(swarm, safe_dist=params["safe_dist"], dt=0.1)
 ```
 
 ```bash
@@ -129,4 +154,7 @@ python3 test_firefighting_drone.py  # 테스트
 # 실시간 기상 (추가 패키지 불필요)
 python3 weather.py 서울           # 현재 기상 요약
 python3 test_weather.py           # 테스트 (네트워크 없이 실행)
+# 기상 연동 출동/비행
+python3 weather_ops_demo.py 서울  # 출동 판단→비행 반영 데모
+python3 test_weather_ops.py       # 테스트 (네트워크 없이 실행)
 ```
