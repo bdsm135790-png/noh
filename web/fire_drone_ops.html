@@ -1842,6 +1842,23 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <div class="disp" id="disp"></div>
       <button class="run" id="go">🚁 드론 군집 출동</button>
     </div>
+    <div class="sec" id="cmpSec" style="display:none">
+      <h3>■ 대응시간 비교 (이 지점)</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:9px;text-align:center">
+          <small style="font-size:9px;color:#64748B">🚒 소방차 도착</small>
+          <b id="cTruck" style="display:block;margin-top:4px;font-size:14px;font-family:Consolas,monospace;color:#38BDF8">—</b></div>
+        <div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:9px;text-align:center">
+          <small style="font-size:9px;color:#64748B">🚁 드론 도착</small>
+          <b id="cDrone" style="display:block;margin-top:4px;font-size:14px;font-family:Consolas,monospace;color:#F97316">—</b></div>
+      </div>
+      <div id="cmpNote" style="font-size:10px;color:#64748B;line-height:1.6;margin-top:9px"></div>
+      <div style="font-size:10px;color:#94A3B8;line-height:1.9;margin-top:9px;padding-top:9px;border-top:1px solid #334155">
+        <span style="display:inline-block;width:16px;border-top:3px solid #475569;vertical-align:middle;margin-right:5px"></span>소방차 진입 가능 도로<br>
+        <span style="display:inline-block;width:16px;border-top:3px dashed #EF4444;vertical-align:middle;margin-right:5px"></span><b style="color:#F87171">소방차 진입불가 골목(4m 미만)</b><br>
+        <span style="display:inline-block;width:16px;border-top:3px solid #38BDF8;vertical-align:middle;margin-right:5px"></span>소방차 실도로 주행경로 · <span style="border-top:3px dashed #F97316;display:inline-block;width:16px;vertical-align:middle"></span> 드론 직선
+      </div>
+    </div>
     <div class="sec">
       <h3>■ 안내</h3>
       <div class="disp s" style="line-height:1.7">
@@ -1897,6 +1914,25 @@ const SAMPLES = {
   "창원시청":{lat:35.2280,lon:128.6811},
   "진해구 중원로 32":{lat:35.1487,lon:128.6657},
 };
+/* 소방차 통행 관련 — 원본 화재확산 시뮬레이션에서 그대로 가져옴. */
+const FIRE_TRUCK_MIN_W = 4;   // 소방차 통행 최소 도로폭(m)
+const DRONE_SPEED = 22;       // 드론 직선 비행 속도(m/s, 약 80km/h)
+const ROAD_W = {              // OSM highway 종별 표준폭(m) 가정
+  motorway:16, trunk:14, primary:13, primary_link:9, secondary:11, secondary_link:8,
+  tertiary:8, tertiary_link:6, unclassified:5, residential:5, living_street:3.5,
+  service:3, pedestrian:4, footway:2, path:2, steps:1.5, track:2.5, cycleway:2,
+};
+const mmss = s => { const t=Math.round(s),h=Math.floor(t/3600),m=Math.floor(t%3600/60),sec=t%60;
+  if(h>0) return `${h}시간 ${String(m).padStart(2,'0')}분`;
+  if(m>0) return `${m}분 ${String(sec).padStart(2,'0')}초`; return `${sec}초`; };
+const metersPerDeg = lat => ({mLat:111320, mLon:111320*Math.cos(lat*Math.PI/180)});
+function decodePolyline(str){ let idx=0,lat=0,lon=0; const out=[];
+  while(idx<str.length){ let b,sh=0,res=0;
+    do{b=str.charCodeAt(idx++)-63;res|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20);
+    lat+=(res&1)?~(res>>1):(res>>1); sh=0;res=0;
+    do{b=str.charCodeAt(idx++)-63;res|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20);
+    lon+=(res&1)?~(res>>1):(res>>1); out.push([lat/1e5,lon/1e5]); }
+  return out; }
 
 /* ── 탭 전환 (지도/3D를 분리, 동시에 띄우지 않음) ── */
 let simUnlocked=false;
@@ -1913,7 +1949,7 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 function gotoTab(s){ document.querySelector(`.tab[data-s="${s}"]`).click(); }
 
 /* ═══════════════ 지도 (Leaflet) ═══════════════ */
-let map, siteMarker, stationMarkers=[], droneLayer, routeLine, NEAR=null, SITE=null;
+let map, siteMarker, stationMarkers=[], droneLayer, roadLayer, routeLine, NEAR=null, SITE=null, TRUCK=null;
 function hav(a,b){const R=6371000,t=x=>x*Math.PI/180,dφ=t(b[0]-a[0]),dλ=t(b[1]-a[1]);
   const s=Math.sin(dφ/2)**2+Math.cos(t(a[0]))*Math.cos(t(b[0]))*Math.sin(dλ/2)**2;
   return 2*R*Math.asin(Math.sqrt(s));}
@@ -1926,6 +1962,56 @@ function initMap(){
     {radius:6,color:'#38BDF8',fillColor:'#0284C7',fillOpacity:.9,weight:2})
     .addTo(map).bindTooltip('🚒 '+s.name,{permanent:false}));
   droneLayer=L.layerGroup().addTo(map);
+  roadLayer=L.layerGroup().addTo(map);
+}
+
+/* 소방차 진입 가능/불가 도로 표시 (OSM 실측 도로망) */
+async function drawRoads(g){
+  roadLayer.clearLayers();
+  try{
+    const {mLat,mLon}=metersPerDeg(g.lat), half=200;
+    const dLat=half/mLat, dLon=half/mLon;
+    const bbox=[(g.lon-dLon).toFixed(6),(g.lat-dLat).toFixed(6),
+                (g.lon+dLon).toFixed(6),(g.lat+dLat).toFixed(6)].join(',');
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),15000);
+    const res=await fetch(`https://api.openstreetmap.org/api/0.6/map?bbox=${bbox}`,{signal:ctrl.signal});
+    clearTimeout(to);
+    const doc=new DOMParser().parseFromString(await res.text(),'text/xml');
+    const nodes={}; doc.querySelectorAll('node').forEach(n=>
+      nodes[n.getAttribute('id')]=[+n.getAttribute('lat'),+n.getAttribute('lon')]);
+    let nPass=0,nBlock=0;
+    doc.querySelectorAll('way').forEach(w=>{
+      const tags={}; w.querySelectorAll('tag').forEach(t=>tags[t.getAttribute('k')]=t.getAttribute('v'));
+      if(!tags.highway) return;
+      const width = tags.width? parseFloat(tags.width) : (ROAD_W[tags.highway] ?? 5);
+      const pts=[...w.querySelectorAll('nd')].map(nd=>nodes[nd.getAttribute('ref')]).filter(Boolean);
+      if(pts.length<2) return;
+      if(width>=FIRE_TRUCK_MIN_W){ nPass++;
+        L.polyline(pts,{color:'#475569',weight:2.2,opacity:.65}).addTo(roadLayer);
+      }else{ nBlock++;
+        L.polyline(pts,{color:'#EF4444',weight:3,opacity:.95,dashArray:'4 5'})
+          .addTo(roadLayer).bindTooltip(`🚫 진입불가 골목 (${width}m)`,{sticky:true});
+      }
+    });
+    return {nPass,nBlock};
+  }catch(e){ return {nPass:0,nBlock:0,err:e.message}; }
+}
+
+/* 소방차 실도로 라우팅 (4개 소방서 중 최속) — 경로·주행시간 */
+async function truckRoute(g){
+  try{
+    const coords=STATIONS.map(x=>`${x.lon},${x.lat}`).join(';')+`;${g.lon},${g.lat}`;
+    const tb=await (await fetch(`https://router.project-osrm.org/table/v1/driving/${coords}`
+      +`?sources=0;1;2;3&destinations=4&annotations=duration,distance`)).json();
+    if(tb.code!=='Ok') throw new Error(tb.code);
+    let bi=0,bd=Infinity;
+    tb.durations.forEach((row,i)=>{ if(row[0]!=null&&row[0]<bd){bd=row[0];bi=i;} });
+    const ts=STATIONS[bi], tSec=tb.durations[bi][0], tM=tb.distances[bi][0];
+    const rt=await (await fetch(`https://router.project-osrm.org/route/v1/driving/`
+      +`${ts.lon},${ts.lat};${g.lon},${g.lat}?overview=full&geometries=polyline`)).json();
+    const line = rt.code==='Ok'? decodePolyline(rt.routes[0].geometry) : [[ts.lat,ts.lon],[g.lat,g.lon]];
+    return {station:ts, sec:tSec, dist:tM, line};
+  }catch(e){ return null; }
 }
 async function geocode(q){
   if(SAMPLES[q]) return {...SAMPLES[q], label:q, via:'샘플좌표'};
@@ -1960,6 +2046,33 @@ async function loadSite(){
     `최근접 거점 <b style="color:#38BDF8">${STATIONS[bi].name}</b> · 직선 ${(bd/1000).toFixed(2)} km<br>`+
     `<span class="s">출동 버튼을 누르면 드론이 현장으로 비행합니다.</span>`;
   $('dispatchSec').style.display='';
+
+  // ── 소방차: 진입 가능/불가 도로 + 실도로 경로·이동시간 ──
+  $('cmpSec').style.display='';
+  $('cTruck').textContent='조회 중…'; $('cDrone').textContent='조회 중…';
+  $('cmpNote').textContent='OSM 도로망·OSRM 경로 조회 중…';
+  const droneFlight = bd / DRONE_SPEED;               // 드론 순수 비행시간(직선)
+  $('cDrone').textContent = mmss(droneFlight);
+  const [roads, tr] = await Promise.all([drawRoads(g), truckRoute(g)]);
+  TRUCK = tr;
+  if(tr){
+    if(routeLine) map.removeLayer(routeLine);
+    routeLine=L.polyline(tr.line,{color:'#38BDF8',weight:3.4,opacity:.9}).addTo(map);
+    const truckArr = tr.sec + 60;                     // 주행 + 출동준비 1분
+    $('cTruck').textContent = mmss(truckArr);
+    const gain = truckArr - droneFlight;
+    $('cmpNote').innerHTML =
+      `🚒 <b style="color:#38BDF8">${tr.station.name}</b> → 도로 ${(tr.dist/1000).toFixed(2)}km · 주행 ${mmss(tr.sec)} + 출동준비 1분<br>`+
+      `🚁 <b style="color:#F97316">${STATIONS[NEAR.idx].name}</b> → 직선 ${(bd/1000).toFixed(2)}km · 비행 ${mmss(droneFlight)}<br>`+
+      (gain>0? `<b style="color:#4ADE80">드론이 ${mmss(gain)} 먼저 도착</b>`
+             : `<b style="color:#38BDF8">소방차가 ${mmss(-gain)} 먼저 도착</b>`)+
+      (roads.nBlock>0? `<br><span style="color:#FCA5A5">🚫 인근 소방차 진입불가 골목 ${roads.nBlock}곳 — 화점까지 호스 연장 필요</span>`
+                     : `<br><span style="color:#64748B">인근 도로는 소방차 진입 가능</span>`);
+  }else{
+    $('cTruck').textContent='조회 실패';
+    $('cmpNote').innerHTML=`<span style="color:#F87171">OSRM 경로 조회 실패(오프라인/차단). 도로 표시만 제공됩니다.</span>`+
+      (roads.nBlock>0?`<br><span style="color:#FCA5A5">🚫 진입불가 골목 ${roads.nBlock}곳</span>`:'');
+  }
 }
 let dispatched=false;
 function dispatch(){
@@ -1971,21 +2084,49 @@ function dispatch(){
   const N=6, drones=[];
   for(let i=0;i<N;i++) drones.push(L.circleMarker(A,
     {radius:5,color:'#fff',fillColor:'#F97316',fillOpacity:1,weight:1.5}).addTo(droneLayer));
-  map.fitBounds(L.latLngBounds([A,B]).pad(0.3));
+  // 🚒 소방차 — 실도로 경로를 따라 이동(진입불가 구간은 도달 못 함).
+  const tline = TRUCK && TRUCK.line ? TRUCK.line : null;
+  let truck=null, tcum=null, ttot=0;
+  if(tline && tline.length>1){
+    truck=L.marker(tline[0],{icon:L.divIcon({html:'🚒',className:'',iconSize:[24,24],iconAnchor:[12,12]})})
+      .addTo(droneLayer);
+    tcum=[0]; for(let i=1;i<tline.length;i++){ ttot+=hav(tline[i-1],tline[i]); tcum.push(ttot); }
+  }
+  const bnds = tline? L.latLngBounds(tline).extend(B) : L.latLngBounds([A,B]);
+  map.fitBounds(bnds.pad(0.2));
   $('go').disabled=true; $('go').textContent='🚁 비행 중…';
-  let t=0; const dur=2600, t0=performance.now();
+  // 드론 도착이 보통 더 빠르므로, 드론 비행 dur을 기준으로 하고 소방차는
+  // 실제 도착시간 비율만큼 더 오래 이동하도록 시간축을 맞춘다.
+  const droneArr = NEAR.dist/DRONE_SPEED;
+  const truckArr = TRUCK? TRUCK.sec+60 : droneArr*1.8;
+  const DR = 2600;                                   // 드론 비행 화면시간(ms)
+  const TR = DR * Math.max(1, truckArr/Math.max(1,droneArr));
+  const t0=performance.now();
   (function fly(now){
-    t=Math.min(1,(now-t0)/dur);
-    const ease=t*t*(3-2*t);
+    const el=now-t0;
+    const t=Math.min(1,el/DR), ease=t*t*(3-2*t);
     drones.forEach((d,i)=>{
       const off=(i-(N-1)/2)*0.00016;
       const lat=A[0]+(B[0]-A[0])*ease + Math.sin(ease*Math.PI)*off;
       const lon=A[1]+(B[1]-A[1])*ease + Math.cos(ease*Math.PI)*off*0.6;
       d.setLatLng([lat,lon]);
     });
+    if(truck && tcum){                               // 소방차: 경로 보간
+      const tp=Math.min(1,el/TR), dist=tp*ttot;
+      let k=1; while(k<tcum.length && tcum[k]<dist) k++;
+      if(k<tcum.length){ const seg=(dist-tcum[k-1])/Math.max(1e-6,tcum[k]-tcum[k-1]);
+        const a=tline[k-1],b=tline[k];
+        truck.setLatLng([a[0]+(b[0]-a[0])*seg, a[1]+(b[1]-a[1])*seg]); }
+    }
     if(t<1){ requestAnimationFrame(fly); }
     else{
-      $('go').textContent='✔ 건물 도착 — 3D 도면 로드';
+      $('go').textContent='✔ 드론 건물 도착 — 3D 도면 로드';
+      // 소방차는 계속 도로를 달려 도착(드론보다 늦게).
+      if(truck && tcum){ (function driveOn(n2){ const tp=Math.min(1,(n2-t0)/TR),dist=tp*ttot;
+        let k=1; while(k<tcum.length&&tcum[k]<dist)k++;
+        if(k<tcum.length){const seg=(dist-tcum[k-1])/Math.max(1e-6,tcum[k]-tcum[k-1]);
+          const a=tline[k-1],b=tline[k];truck.setLatLng([a[0]+(b[0]-a[0])*seg,a[1]+(b[1]-a[1])*seg]);}
+        if(tp<1) requestAnimationFrame(driveOn); })(performance.now()); }
       unlockSim();
     }
   })(t0);
