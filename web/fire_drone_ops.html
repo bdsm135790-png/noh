@@ -1835,6 +1835,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <span>부림시장</span><span>마산어시장</span><span>창원시청</span><span>진해구 중원로 32</span>
       </div>
       <button class="load" id="load">🗺 이 주소로 현장 잡기</button>
+      <div style="font-size:10px;color:#38BDF8;margin-top:8px">👆 또는 <b>지도를 터치/클릭</b>해 현장을 바로 지정하세요.</div>
       <div id="msg"></div>
     </div>
     <div class="sec" id="dispatchSec" style="display:none">
@@ -1862,7 +1863,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="sec">
       <h3>■ 안내</h3>
       <div class="disp s" style="line-height:1.7">
-        1) 주소로 현장을 잡습니다.<br>
+        1) 주소를 입력하거나 <b style="color:#38BDF8">지도를 터치</b>해 현장을 잡습니다.<br>
         2) <b style="color:#F97316">드론 군집 출동</b>을 누르면 최근접 소방 거점에서
            드론이 현장으로 비행합니다.<br>
         3) <b style="color:#38BDF8">건물 도착 시</b> 그 건물의 3D 도면을 불러와
@@ -1963,6 +1964,8 @@ function initMap(){
     .addTo(map).bindTooltip('🚒 '+s.name,{permanent:false}));
   droneLayer=L.layerGroup().addTo(map);
   roadLayer=L.layerGroup().addTo(map);
+  // 지도 터치(클릭) → 그 지점을 현장으로 지정.
+  map.on('click', e=>{ loadAtLatLon(e.latlng.lat, e.latlng.lng); });
 }
 
 /* 소방차 진입 가능/불가 도로 표시 (OSM 실측 도로망) */
@@ -2032,7 +2035,14 @@ async function loadSite(){
   const q=$('addr').value.trim(); if(!q) return;
   $('msg').textContent='좌표 조회 중…';
   const g=await geocode(q);
-  if(!g){ $('msg').innerHTML='<span style="color:#F87171">좌표를 찾지 못했습니다. 샘플 지점을 눌러보세요.</span>'; return; }
+  if(!g){ $('msg').innerHTML='<span style="color:#F87171">좌표를 찾지 못했습니다. 샘플 지점을 누르거나 지도를 터치하세요.</span>'; return; }
+  await applySite(g);
+}
+/* 지도 터치(클릭)로 현장 지정 — 주소 없이 좌표만으로 동일 처리 */
+async function loadAtLatLon(lat, lon){
+  await applySite({lat, lon, label:`선택 지점 (${lat.toFixed(5)}, ${lon.toFixed(5)})`, via:'지도 터치'});
+}
+async function applySite(g){
   SITE=g;
   let bi=0,bd=1e9; STATIONS.forEach((s,i)=>{const d=hav([s.lat,s.lon],[g.lat,g.lon]); if(d<bd){bd=d;bi=i;}});
   NEAR={idx:bi,dist:bd};
