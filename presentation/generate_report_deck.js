@@ -18,7 +18,7 @@ const C = {
   green:"15803D", greenL:"DCFCE7", amber:"D97706",
   onDark:"E2E8F0", onDarkMute:"94A3B8",
 };
-const CAT = ["2563EB","EA580C","7C3AED","15803D"];       // 검증된 카테고리 팔레트
+const CAT = ["2563EB","EA580C","7C3AED","15803D"];
 const HEAT = ["FEE2E2","FECACA","FCA5A5","F87171","EF4444","DC2626","B91C1C","991B1B"];
 
 const bg=(s,c=C.page)=>{ s.background={color:c}; };
@@ -42,12 +42,9 @@ function numBadge(s,x,y,d,n,color){
   s.addShape(OVAL,{x,y,w:d,h:d,fill:{color},line:{type:"none"}});
   s.addText(String(n),{x,y,w:d,h:d,align:"center",valign:"middle",fontFace:FM,fontSize:d*36,color:"FFFFFF",bold:true,margin:0});
 }
-
-/* 위험 히트맵 지도 (스타일화) */
+/* 위험 히트맵 지도 */
 function riskMap(s, x, y, w, h, opts={}){
-  const NX=11, NY=8;
-  const cw=w/NX, ch=h/NY;
-  // 핫스팟 중심(원도심)
+  const NX=11, NY=8, cw=w/NX, ch=h/NY;
   const hs=[[3.0,3.2,1.0],[4.2,4.6,0.85],[7.6,2.4,0.7]];
   s.addShape(RECT,{x,y,w,h,fill:{color:"EEF2F6"},line:{color:C.border,width:1}});
   for(let r=0;r<NY;r++) for(let c=0;c<NX;c++){
@@ -56,9 +53,7 @@ function riskMap(s, x, y, w, h, opts={}){
     if(idx<1 && ((r+c)%3===0)) idx=1;
     s.addShape(RECT,{x:x+c*cw+0.01,y:y+r*ch+0.01,w:cw-0.02,h:ch-0.02,fill:{color:HEAT[idx]},line:{type:"none"}});
   }
-  // 소방서 후보
-  const stations=opts.stations||[];
-  stations.forEach(st=>{
+  (opts.stations||[]).forEach(st=>{
     const sx=x+st.c*cw, sy=y+st.r*ch;
     if(st.sel){
       s.addShape(OVAL,{x:sx-0.28,y:sy-0.28,w:0.56,h:0.56,fill:{color:"FFFFFF"},line:{color:C.blue,width:2.5}});
@@ -78,9 +73,8 @@ function riskMap(s, x, y, w, h, opts={}){
     {text:"데이터로 정한 소방 드론 거점,\n", options:{color:C.onDark}},
     {text:"그리고 현장에서의 대응 로직", options:{color:C.orange}},
   ], {x:0.72,y:1.75,w:11.9,h:1.9,fontFace:F,fontSize:40,bold:true,lineSpacingMultiple:1.08,margin:0});
-  s.addText("화재 빅데이터 · 지도 분석 기반 소방 드론 배치 → 현장 대응 로직", {x:0.75,y:3.75,w:11,h:0.5,fontFace:F,fontSize:17,color:C.onDarkMute,margin:0});
-  // 2부 안내
-  const parts=[["PART 1","어디에 배치할 것인가","화재·도로·취약 데이터 분석 → 거점 소방서 선정",C.red],
+  s.addText("최근 1년 화재 발생 빅데이터로 창원을 정하고, 지도 분석으로 거점을 정한다", {x:0.75,y:3.75,w:11.5,h:0.5,fontFace:F,fontSize:16.5,color:C.onDarkMute,margin:0});
+  const parts=[["PART 1","어디에 배치할 것인가","화재 빅데이터 분석 → 창원 · 거점 소방서 선정",C.red],
     ["PART 2","도착 후 어떻게 움직이는가","출동·도착 → 편대 SOP-D → 현장 정밀 대응",C.violet]];
   let x=0.75;
   parts.forEach(([tag,t,d,col])=>{
@@ -99,26 +93,25 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s,C.dark);
   s.addText("PART 1", {x:0.75,y:2.5,w:5,h:0.6,fontFace:FM,fontSize:22,color:C.red,bold:true,charSpacing:4,margin:0});
   s.addText("어디에 배치할 것인가", {x:0.72,y:3.1,w:11.5,h:0.9,fontFace:F,fontSize:38,color:C.onDark,bold:true,margin:0});
-  s.addText("불이 자주 나고, 소방차가 못 가는 곳은 어디인가? — 화재·도로·취약 데이터를 모아 드론을 배치할 소방서를 정한다.",
-    {x:0.75,y:4.05,w:11,h:0.8,fontFace:F,fontSize:15,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.3});
-  // 단계 미리보기
-  const steps=["데이터 수집","지도 API 연동","취약지 분석","거점 소방서 선정"];
+  s.addText("최근 1년 화재 발생 빈도로 대상 지역을 창원으로 정하고 — 지도에서 소방차가 못 가는 경로를 찾아 드론 거점 소방서를 정한다.",
+    {x:0.75,y:4.05,w:11.4,h:0.8,fontFace:F,fontSize:15,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.3});
+  const steps=["데이터 수집","지역 선정 · 창원","지도·경로 분석","거점 선정"];
   let x=0.75;
   steps.forEach((t,i)=>{
     s.addShape(RR,{x,y:5.15,w:2.7,h:0.7,rectRadius:0.1,fill:{color:"172033"},line:{color:C.border2,width:1}});
     s.addText([{text:`0${i+1}  `,options:{color:C.red,bold:true,fontFace:FM}},{text:t,options:{color:C.onDark}}],
-      {x:x+0.2,y:5.15,w:2.4,h:0.7,valign:"middle",fontFace:F,fontSize:12.5,bold:true,margin:0});
+      {x:x+0.2,y:5.15,w:2.4,h:0.7,valign:"middle",fontFace:F,fontSize:12,bold:true,margin:0});
     if(i<3) s.addText("›",{x:x+2.7,y:5.15,w:0.35,h:0.7,align:"center",valign:"middle",fontFace:F,fontSize:20,color:C.dim,margin:0});
     x+=3.05;
   });
 }
 
-/* ════════ ③ 데이터 수집 ════════ */
+/* ════════ ③ STEP 01 데이터 수집 ════════ */
 {
   const s=p.addSlide(); bg(s);
   header(s,"PART 1 · STEP 01","화재 관련 데이터를 모은다");
   const data=[
-    ["화재 발생 이력","경남소방본부","최근 화재 발생 지점·건수·원인",C.red,C.redL],
+    ["화재 발생 빈도","소방안전 빅데이터 플랫폼","최근 1년 시·군구별 화재 건수",C.red,C.redL],
     ["도로폭·도로망","지자체 · OSM","골목 폭 · 소방차 진입 가능성",C.orange,C.orangeL],
     ["건축물대장","국가공간정보포털","노후 건축물 비율 → 취약 지수",C.violet,C.violetL],
     ["고령·인구","통계청 KOSIS·SGIS","65세+ 교통약자 밀집 지역",C.blue,C.blueL],
@@ -129,127 +122,149 @@ function riskMap(s, x, y, w, h, opts={}){
     card(s,x,cy,cw,ch);
     s.addShape(RR,{x:x+0.22,y:cy+0.25,w:cw-0.44,h:0.62,rectRadius:0.08,fill:{color:fl},line:{type:"none"}});
     s.addText(t,{x:x+0.22,y:cy+0.25,w:cw-0.44,h:0.62,align:"center",valign:"middle",fontFace:F,fontSize:12.5,color:col,bold:true,margin:0,lineSpacingMultiple:0.95});
-    s.addText(src,{x:x+0.22,y:cy+1.05,w:cw-0.44,h:0.35,fontFace:F,fontSize:10.5,color:C.dim,bold:true,margin:0});
-    s.addText(use,{x:x+0.22,y:cy+1.5,w:cw-0.44,h:1.3,fontFace:F,fontSize:11.5,color:C.body,margin:0,lineSpacingMultiple:1.2,valign:"top"});
+    s.addText(src,{x:x+0.22,y:cy+1.02,w:cw-0.44,h:0.5,fontFace:F,fontSize:10.5,color:C.dim,bold:true,margin:0,valign:"top",lineSpacingMultiple:1.05});
+    s.addText(use,{x:x+0.22,y:cy+1.6,w:cw-0.44,h:1.2,fontFace:F,fontSize:11.5,color:C.body,margin:0,lineSpacingMultiple:1.2,valign:"top"});
     x+=cw+gap;
   });
   flatCard(s,0.6,5.15,12.1,1.2,C.panel2);
-  s.addText([{text:"공공 빅데이터 5종을 파이썬으로 통합·정제  ",options:{color:C.ink,bold:true}},
-    {text:"— Pandas · NumPy로 수집/전처리, Matplotlib · Seaborn으로 상관관계 시각화.",options:{color:C.mute}}],
+  s.addText([{text:"핵심 = 소방안전 빅데이터 플랫폼의 최근 1년 화재 발생 빈도.  ",options:{color:C.ink,bold:true}},
+    {text:"여기에 도로·건축·인구 데이터를 파이썬(Pandas·NumPy·Matplotlib)으로 통합·시각화한다.",options:{color:C.mute}}],
     {x:0.9,y:5.15,w:11.5,h:1.2,valign:"middle",fontFace:F,fontSize:13.5,margin:0,lineSpacingMultiple:1.2});
 }
 
-/* ════════ ④ 지도 API 연동 ════════ */
+/* ════════ ④ STEP 02 지역 선정 = 창원 ════════ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 02","지도 API로 실제 도로 위에 올린다");
-  const flow=[
-    ["주소·지점","도로명주소 · 화재 발생지",C.blue],
-    ["좌표 변환","지도 API → 위경도",C.blue],
-    ["도로망 수집","실측 도로 · 골목 폭",C.orange],
-    ["격자화","3m 격자 · 취약지 매핑",C.red],
-  ];
-  let x=0.6; const cw=2.86, gap=0.35, cy=1.95, ch=1.9;
-  flow.forEach(([t,d,col],i)=>{
-    card(s,x,cy,cw,ch);
-    numBadge(s,x+0.25,cy+0.28,0.6,i+1,col);
-    s.addText(t,{x:x+0.25,y:cy+1.0,w:cw-0.5,h:0.4,fontFace:F,fontSize:15,color:C.ink,bold:true,margin:0});
-    s.addText(d,{x:x+0.25,y:cy+1.4,w:cw-0.5,h:0.45,fontFace:F,fontSize:11,color:C.mute,margin:0,lineSpacingMultiple:1.1,valign:"top"});
-    if(i<3) s.addText("›",{x:x+cw+0.02,y:cy,w:gap-0.04,h:ch,align:"center",valign:"middle",fontFace:F,fontSize:26,color:C.dim,bold:true,margin:0});
-    x+=cw+gap;
-  });
-  flatCard(s,0.6,4.25,5.9,2.1,C.panel2);
-  s.addText("무엇을 얻나",{x:0.85,y:4.42,w:5,h:0.35,fontFace:F,fontSize:13,color:C.red,bold:true,margin:0});
-  ["화재 지점을 실제 좌표·도로 위에 정렬","소방차 진입 가능/불가 도로 구분","취약지 분석을 위한 격자 데이터 확보"].forEach((t,i)=>{
-    dot(s,0.9,4.9+i*0.42,0.14,C.blue);
-    s.addText(t,{x:1.2,y:4.79+i*0.42,w:5.1,h:0.4,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle"});
-  });
-  // 우: 미니 도로격자
-  const px=6.8,py=4.25,pw=5.9,ph=2.1;
-  s.addShape(RECT,{x:px,y:py,w:pw,h:ph,fill:{color:"EEF2F6"},line:{color:C.border,width:1}});
-  for(let i=0;i<5;i++) s.addShape(LINE,{x:px+0.3+i*1.12,y:py+0.2,w:0,h:ph-0.4,line:{color:C.border2,width:1}});
-  s.addShape(RECT,{x:px+0.3,y:py+0.95,w:pw-0.6,h:0.16,fill:{color:C.blue},line:{type:"none"}});
-  s.addShape(RECT,{x:px+2.5,y:py+0.2,w:0.09,h:ph-0.4,fill:{color:C.red},line:{type:"none"}});
-  s.addText("파랑=진입가능 · 빨강=진입불가 골목",{x:px,y:py+ph-0.34,w:pw,h:0.3,align:"center",fontFace:F,fontSize:9.5,color:C.mute,margin:0});
-  s.addText("주소·지점을 좌표로 바꾸고, 실제 도로망을 얹어 3m 격자로 만든다.",{x:0.6,y:3.55,w:12.1,h:0.4,fontFace:F,fontSize:12.5,color:C.mute,italic:true,margin:0});
-}
-
-/* ════════ ⑤ 분석 ① 화재 빈발 지역 ════════ */
-{
-  const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 03","분석 ① — 화재가 자주 나는 지역",C.orange);
-  s.addText("최근 3년 지역별 화재 발생 건수 (예시)",{x:0.6,y:1.5,w:8,h:0.35,fontFace:F,fontSize:13,color:C.mute,margin:0});
+  header(s,"PART 1 · STEP 02","대상 지역을 창원으로 정한다",C.red);
+  s.addText("소방안전 빅데이터 플랫폼 · 최근 1년 · 경남 시·군별 화재 발생 건수 (창원시 = 5개 구 합산)",
+    {x:0.6,y:1.5,w:11.5,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
   s.addChart(p.ChartType.bar, [{name:"화재건수",
-    labels:["마산합포구","진해구","마산회원구","성산구","의창구"], values:[128,96,84,61,47]}],
-    {x:0.6,y:1.95,w:7.6,h:4.35, barDir:"col", chartColors:[C.red],
-     showValue:true, dataLabelPosition:"outEnd", dataLabelColor:C.ink, dataLabelFontFace:FM, dataLabelFontSize:12, dataLabelFontBold:true,
+    labels:["창원시","김해시","진주시","양산시","밀양시","함안군","거제시"], values:[563,457,318,271,239,193,187]}],
+    {x:0.6,y:1.95,w:8.0,h:4.35, barDir:"col",
+     chartColors:["DC2626","93C5FD","93C5FD","93C5FD","93C5FD","93C5FD","93C5FD"],
+     showValue:true, dataLabelPosition:"outEnd", dataLabelColor:C.ink, dataLabelFontFace:FM, dataLabelFontSize:11.5, dataLabelFontBold:true,
      showLegend:false, showTitle:false,
      catAxisLabelColor:C.body, catAxisLabelFontFace:F, catAxisLabelFontSize:11, catGridLine:{style:"none"}, catAxisLineColor:C.border2,
-     valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:150, barGapWidthPct:55});
-  card(s,8.55,1.95,4.15,4.35,C.panel2,C.border);
-  s.addText("읽는 법",{x:8.85,y:2.2,w:3.6,h:0.35,fontFace:F,fontSize:14,color:C.red,bold:true,margin:0});
-  ["구도심(마산합포·진해)이 상위","전통시장·노후주택 밀집과 겹침","화재 빈도 = 위험지수의 핵심 축"].forEach((t,i)=>{
-    dot(s,8.9,2.78+i*0.62,0.15,C.red);
-    s.addText(t,{x:9.2,y:2.62+i*0.62,w:3.3,h:0.6,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle",lineSpacingMultiple:1.1});
-  });
-  flatCard(s,8.85,4.75,3.6,1.3,C.redL,"FCA5A5");
-  s.addText("상위 2개 구",{x:9.1,y:4.9,w:3.1,h:0.35,fontFace:F,fontSize:12,color:C.red,bold:true,margin:0});
-  s.addText("전체 화재의 절반 이상 집중",{x:9.1,y:5.25,w:3.2,h:0.7,fontFace:F,fontSize:12.5,color:C.ink,margin:0,valign:"top",lineSpacingMultiple:1.1});
+     valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:640, barGapWidthPct:45});
+  card(s,8.9,1.95,3.8,4.35,C.panel2,C.border);
+  s.addText("대상 지역",{x:9.2,y:2.2,w:3.2,h:0.35,fontFace:F,fontSize:13,color:C.mute,bold:true,margin:0});
+  s.addText("창원시",{x:9.2,y:2.56,w:3.3,h:0.6,fontFace:F,fontSize:28,color:C.red,bold:true,margin:0});
+  s.addText("563",{x:9.2,y:3.25,w:2.4,h:0.85,fontFace:FM,fontSize:50,color:C.ink,bold:true,margin:0});
+  s.addText("건 · 경남 최다",{x:9.2,y:4.12,w:3.3,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
+  s.addShape(LINE,{x:9.2,y:4.55,w:3.2,h:0,line:{color:C.border,width:1}});
+  s.addText("경남 전체 화재의 15.8% 집중 — 화재 최다 도시를 드론 배치 대상 지역으로 확정",
+    {x:9.2,y:4.68,w:3.3,h:1.5,fontFace:F,fontSize:12.5,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.3});
+  s.addNotes("소방안전 빅데이터 플랫폼 최근 1년 화재건수에서 창원시가 563건으로 경남 최다 → 대상 지역을 창원으로 확정.");
 }
 
-/* ════════ ⑥ 분석 ② 도로 폭 좁은 지역 ════════ */
+/* ════════ ⑤ STEP 03 지도 · 경로 분석 (진입불가 빨간선) ════════ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 03","분석 ② — 소방차가 못 가는 좁은 골목",C.orange);
-  s.addText("지역별 폭 4m 미만(소방차 진입불가) 도로 비율 (예시, %)",{x:0.6,y:1.5,w:9,h:0.35,fontFace:F,fontSize:13,color:C.mute,margin:0});
-  s.addChart(p.ChartType.bar, [{name:"진입불가 비율",
-    labels:["마산합포구","진해구","마산회원구","성산구","의창구"], values:[38,34,29,18,14]}],
+  header(s,"PART 1 · STEP 03","지도에 화재지점 표시 · 진입불가 경로는 빨간선",C.orange);
+  // 좌: 지도
+  const px=0.6,py=1.8,pw=7.7,ph=4.55;
+  card(s,px,py,pw,ph,C.card,C.border);
+  const mx=px+0.25,my=py+0.25,mw=pw-0.5,mh=ph-0.85;
+  s.addShape(RECT,{x:mx,y:my,w:mw,h:mh,fill:{color:"EEF2F6"},line:{color:C.border,width:1}});
+  // 건물 블록
+  const blk=(bx,by,bw,bh)=>s.addShape(RECT,{x:mx+bx,y:my+by,w:bw,h:bh,fill:{color:"DDE3EA"},line:{color:"CBD5E1",width:0.75}});
+  [[0.4,0.4,1.3,0.9],[2.2,0.35,1.4,0.8],[5.0,0.45,1.4,0.9],[0.5,1.8,1.2,1.0],[3.6,1.7,1.3,1.1],[5.6,1.9,1.2,1.0],[1.9,2.6,1.3,0.7]].forEach(b=>blk(...b));
+  // 진입가능 파란 도로 (main)
+  const road=(x1,y1,x2,y2,col,wd)=>s.addShape(LINE,{x:mx+x1,y:my+y1,w:x2-x1,h:y2-y1,line:{color:col,width:wd}});
+  road(0.2,1.55,mw-0.2,1.55,C.blue,4.5);       // 가로 간선
+  road(2.0,0.2,2.0,mh-0.2,C.blue,4.5);          // 세로 간선
+  road(4.9,1.55,4.9,mh-0.2,C.blue,4);
+  // 진입불가 빨간 골목
+  road(2.0,1.55,3.1,0.7,C.red,3.5);
+  road(4.9,1.55,5.9,0.85,C.red,3.5);
+  road(0.9,1.55,0.9,2.7,C.red,3.5);
+  road(3.5,2.9,4.6,3.15,C.red,3.5);
+  road(6.2,1.55,6.7,2.7,C.red,3.5);
+  // 화재 발생지점 (골목 끝)
+  const fire=(fx,fy)=>{ s.addShape(OVAL,{x:mx+fx-0.14,y:my+fy-0.14,w:0.28,h:0.28,fill:{color:C.orange},line:{color:C.red,width:1.5}}); };
+  fire(3.1,0.7); fire(5.9,0.85); fire(0.9,2.7); fire(4.6,3.15); fire(6.7,2.7);
+  // 소방서
+  s.addShape(OVAL,{x:mx+0.05,y:my+mh-0.55,w:0.4,h:0.4,fill:{color:"FFFFFF"},line:{color:C.blue,width:2.5}});
+  s.addShape(RECT,{x:mx+0.14,y:my+mh-0.46,w:0.22,h:0.22,fill:{color:C.blue},line:{type:"none"}});
+  s.addText("소방서",{x:mx-0.1,y:my+mh-0.16,w:0.7,h:0.22,align:"center",fontFace:F,fontSize:8,color:C.blue,bold:true,margin:0});
+  // 범례
+  const ly=py+ph-0.42;
+  s.addShape(LINE,{x:px+0.3,y:ly+0.1,w:0.4,h:0,line:{color:C.red,width:3.5}});
+  s.addText("소방차 진입불가 경로",{x:px+0.78,y:ly-0.04,w:2.2,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  s.addShape(LINE,{x:px+3.0,y:ly+0.1,w:0.4,h:0,line:{color:C.blue,width:3.5}});
+  s.addText("진입가능 도로",{x:px+3.48,y:ly-0.04,w:1.7,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  dot(s,px+5.2,ly+0.02,0.18,C.orange,C.red);
+  s.addText("화재 발생지점",{x:px+5.45,y:ly-0.04,w:1.9,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  // 우: 설명
+  const steps=[
+    ["화재지점 표시","최근 1년 창원 화재 발생지점을 지도에 올린다",C.orange],
+    ["경로 탐색","각 지점까지 소방서에서 실측 도로망으로 경로를 찾는다",C.blue],
+    ["빨간선 = 진입불가","경로 중 폭 4m 미만 구간을 빨간선으로 표시한다",C.red],
+    ["드론 필요 지점","빨간선이 걸린 화재지점 = 드론이 가장 필요한 곳",C.violet],
+  ];
+  let y=1.9;
+  steps.forEach(([t,d,col],i)=>{
+    flatCard(s,8.5,y,4.2,1.02,C.panel2);
+    numBadge(s,8.72,y+0.28,0.46,i+1,col);
+    s.addText(t,{x:9.32,y:y+0.13,w:3.3,h:0.35,fontFace:F,fontSize:13,color:col,bold:true,margin:0});
+    s.addText(d,{x:9.32,y:y+0.47,w:3.3,h:0.5,fontFace:F,fontSize:10.5,color:C.body,margin:0,lineSpacingMultiple:1.05,valign:"top"});
+    y+=1.12;
+  });
+  s.addNotes("화재 발생지점을 지도에 표시하고, 소방서에서 각 지점까지 경로를 탐색해 소방차가 못 가는 폭 4m 미만 구간을 빨간선으로 표시했다.");
+}
+
+/* ════════ ⑥ STEP 04 취약지 분석 ① 창원 구별 화재 ════════ */
+{
+  const s=p.addSlide(); bg(s);
+  header(s,"PART 1 · STEP 04","분석 ① — 창원 구별 화재와 피해",C.orange);
+  s.addText("소방안전 빅데이터 플랫폼 · 최근 1년 · 창원시 구별 화재 발생 건수",{x:0.6,y:1.5,w:11,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
+  s.addChart(p.ChartType.bar, [{name:"화재건수",
+    labels:["의창구","진해구","마산합포구","성산구","마산회원구"], values:[126,117,116,116,88]}],
     {x:0.6,y:1.95,w:7.6,h:4.35, barDir:"col", chartColors:[C.orange],
      showValue:true, dataLabelPosition:"outEnd", dataLabelColor:C.ink, dataLabelFontFace:FM, dataLabelFontSize:12, dataLabelFontBold:true,
-     dataLabelFormatCode:'0"%"',
      showLegend:false, showTitle:false,
      catAxisLabelColor:C.body, catAxisLabelFontFace:F, catAxisLabelFontSize:11, catGridLine:{style:"none"}, catAxisLineColor:C.border2,
-     valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:46, barGapWidthPct:55});
+     valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:145, barGapWidthPct:55});
   card(s,8.55,1.95,4.15,4.35,C.panel2,C.border);
   s.addText("읽는 법",{x:8.85,y:2.2,w:3.6,h:0.35,fontFace:F,fontSize:14,color:C.orange,bold:true,margin:0});
-  ["구도심일수록 진입불가 골목이 많다","불은 좁은 골목을 복사열로 건너뜀","진입불가 구간 = 드론이 가장 필요한 곳"].forEach((t,i)=>{
+  ["구별 화재건수는 88~126건으로 비슷","차이는 도로·노후·인명피해에서 갈린다","마산합포구는 인명피해가 창원 최다"].forEach((t,i)=>{
     dot(s,8.9,2.78+i*0.62,0.15,C.orange);
     s.addText(t,{x:9.2,y:2.62+i*0.62,w:3.3,h:0.6,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle",lineSpacingMultiple:1.1});
   });
-  flatCard(s,8.85,4.75,3.6,1.3,C.orangeL,"FDBA74");
-  s.addText("마산합포구 38%",{x:9.1,y:4.9,w:3.1,h:0.35,fontFace:F,fontSize:12,color:C.orange,bold:true,margin:0});
-  s.addText("도로 3곳 중 1곳 이상 진입 불가",{x:9.1,y:5.25,w:3.2,h:0.7,fontFace:F,fontSize:12.5,color:C.ink,margin:0,valign:"top",lineSpacingMultiple:1.1});
+  flatCard(s,8.85,4.75,3.6,1.3,C.redL,"FCA5A5");
+  s.addText("마산합포구",{x:9.1,y:4.9,w:3.1,h:0.35,fontFace:F,fontSize:12,color:C.red,bold:true,margin:0});
+  s.addText("인명피해 22명(사망 5) — 원도심 위험 집중",{x:9.1,y:5.25,w:3.2,h:0.8,fontFace:F,fontSize:12,color:C.ink,margin:0,valign:"top",lineSpacingMultiple:1.15});
 }
 
-/* ════════ ⑦ 종합 위험 지수 ════════ */
+/* ════════ ⑦ STEP 04 취약지 분석 ② 종합 위험 지수 ════════ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 03","분석 ③ — 종합 위험 지수로 합친다",C.orange);
-  s.addText("화재빈도 · 도로협소 · 노후건물 · 고령인구를 가중 합산 (예시 점수)",{x:0.6,y:1.5,w:10,h:0.35,fontFace:F,fontSize:13,color:C.mute,margin:0});
+  header(s,"PART 1 · STEP 04","분석 ② — 종합 위험 지수로 합친다",C.orange);
+  s.addText("화재빈도(실측 반영) · 도로협소 · 노후건물 · 고령인구 가중 합산 (도로·노후·고령은 예시)",
+    {x:0.6,y:1.5,w:11.5,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
   s.addChart(p.ChartType.bar, [
-    {name:"화재빈도", labels:["마산합포구","진해구","마산회원구","성산구"], values:[34,28,24,15]},
-    {name:"도로협소", labels:["마산합포구","진해구","마산회원구","성산구"], values:[30,27,22,13]},
-    {name:"노후건물", labels:["마산합포구","진해구","마산회원구","성산구"], values:[22,20,17,12]},
-    {name:"고령인구", labels:["마산합포구","진해구","마산회원구","성산구"], values:[18,19,14,11]},
+    {name:"화재빈도", labels:["마산합포구","진해구","의창구","성산구"], values:[30,29,33,30]},
+    {name:"도로협소", labels:["마산합포구","진해구","의창구","성산구"], values:[31,28,14,13]},
+    {name:"노후건물", labels:["마산합포구","진해구","의창구","성산구"], values:[24,20,12,13]},
+    {name:"고령인구", labels:["마산합포구","진해구","의창구","성산구"], values:[19,18,11,11]},
   ], {x:0.6,y:2.0,w:8.2,h:4.05, barDir:"col", barGrouping:"stacked", chartColors:CAT,
      showValue:false, showLegend:true, legendPos:"b", legendColor:C.body, legendFontFace:F, legendFontSize:11,
      showTitle:false, catAxisLabelColor:C.body, catAxisLabelFontFace:F, catAxisLabelFontSize:11,
      catGridLine:{style:"none"}, catAxisLineColor:C.border2, valAxisHidden:true, valGridLine:{style:"none"}, barGapWidthPct:60});
-  // 우: 결론
   card(s,9.15,2.0,3.55,4.05,C.panel2,C.border);
   s.addText("종합 1위",{x:9.4,y:2.22,w:3.1,h:0.35,fontFace:F,fontSize:13,color:C.mute,bold:true,margin:0});
   s.addText("마산합포구",{x:9.4,y:2.58,w:3.1,h:0.55,fontFace:F,fontSize:22,color:C.red,bold:true,margin:0});
   s.addText("104",{x:9.4,y:3.15,w:2.2,h:0.8,fontFace:FM,fontSize:44,color:C.ink,bold:true,margin:0});
   s.addText("점 / 위험지수",{x:9.4,y:3.98,w:3.1,h:0.3,fontFace:F,fontSize:11,color:C.mute,margin:0});
   s.addShape(LINE,{x:9.4,y:4.4,w:3.0,h:0,line:{color:C.border,width:1}});
-  s.addText("네 지표가 모두 상위 → 드론 우선 배치 대상 지역으로 도출",{x:9.4,y:4.5,w:3.1,h:1.4,fontFace:F,fontSize:12.5,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.3});
+  s.addText("의창구는 화재건수 최다지만 도로·노후가 낮아 종합은 하위 — 원도심(마산합포·진해)이 상위",
+    {x:9.4,y:4.5,w:3.1,h:1.5,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.25});
 }
 
-/* ════════ ⑧ 거점 소방서 선정 ════════ */
+/* ════════ ⑧ STEP 05 거점 소방서 선정 ════════ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 04","거점 소방서를 정한다",C.red);
-  // 좌: 히트맵 지도
+  header(s,"PART 1 · STEP 05","창원 안에서 거점 소방서를 정한다",C.red);
   card(s,0.6,1.75,7.1,4.6);
   riskMap(s,0.85,2.0,6.6,3.85,{stations:[
     {r:3.4,c:2.6,name:"마산소방서",sel:true},
@@ -257,11 +272,10 @@ function riskMap(s, x, y, w, h, opts={}){
     {r:2.0,c:8.6,name:"창원소방서"},
   ]});
   s.addText("붉을수록 위험 지수 높음 · ★ 선정 거점",{x:0.85,y:5.9,w:6.6,h:0.3,align:"center",fontFace:F,fontSize:10,color:C.mute,margin:0});
-  // 우: 선정 근거
   s.addText("선정 — 마산소방서",{x:8.0,y:1.85,w:4.7,h:0.45,fontFace:F,fontSize:19,color:C.blue,bold:true,margin:0});
   const reasons=[
     ["위험지수 최상위 인접","종합 1위 마산합포구를 최단 거리에서 커버",C.red],
-    ["진입불가 구간 최다","좁은 골목 밀집 원도심을 상공에서 보완",C.orange],
+    ["진입불가 경로 최다","빨간선 밀집 원도심 골목을 상공에서 보완",C.orange],
     ["교통약자 밀집","고령 인구 대피 취약지에 초동 대응",C.blue],
     ["보급 거점 확보","드론·UGV 재보급 스마트 방재 거점 병설",C.green],
   ];
@@ -273,7 +287,7 @@ function riskMap(s, x, y, w, h, opts={}){
     s.addText(d,{x:8.65,y:y+0.46,w:3.95,h:0.4,fontFace:F,fontSize:10.5,color:C.mute,margin:0});
     y+=1.0;
   });
-  s.addNotes("위험지수 히트맵 위에 후보 소방서 커버리지를 겹쳐, 상위 취약지를 최단 거리에서 커버하는 마산소방서를 드론 거점으로 선정.");
+  s.addNotes("창원 원도심 위험지수 히트맵 위에서, 상위 취약지(마산합포·진해)를 최단 거리로 커버하는 마산소방서를 드론 거점으로 선정.");
 }
 
 /* ════════ ⑨ PART 2 표지 (다크) ════════ */
@@ -346,7 +360,7 @@ function riskMap(s, x, y, w, h, opts={}){
   const phases=[
     ["전개","DEPLOY","정찰·진압·구조 편대 전개·상승","101-D","6366F1"],
     ["정찰·평가","ASSESS","3D 스캐닝·열화상 화점/진입점 파악","102-D",C.sky],
-    ["작전","OPERATE","창문 파쇄 후 정밀 소화탄 · 대피 인도",C.orange==='EA580C'?"222-D":"222-D",C.orange],
+    ["작전","OPERATE","창문 파쇄 후 정밀 소화탄 · 대피 인도","222-D",C.orange],
     ["중계·호위","RELAY","요구조자 호위 · 외벽 연소차단 · 배터리 릴레이","105-D",C.red],
     ["종결","CLEAR","대피 완료 확인 · 잔불 감시 · RTH","113-D",C.green],
   ];
@@ -406,12 +420,11 @@ function riskMap(s, x, y, w, h, opts={}){
   });
 }
 
-/* ════════ ⑭ 유무인 복합 + 기대효과 마무리 (다크) ════════ */
+/* ════════ ⑭ UGV + 기대효과 마무리 (다크) ════════ */
 {
   const s=p.addSlide(); bg(s,C.dark);
   s.addText("PART 2 · 확장", {x:0.72,y:0.5,w:11,h:0.3,fontFace:F,fontSize:12.5,color:C.violet,bold:true,charSpacing:3,margin:0});
   s.addText("드론+UGV 유무인 복합, 그리고 기대효과", {x:0.72,y:0.8,w:12,h:0.7,fontFace:F,fontSize:26,color:C.onDark,bold:true,margin:0});
-  // UGV 협업 3카드
   const roles=[
     ["지상 UGV","장애물 극복 · 소화수 보급 · 방재 거점 기점","34D399"],
     ["드론 편대","상공 정밀 정찰·진압 — 골목 위를 넘는다",C.violet],
@@ -424,20 +437,18 @@ function riskMap(s, x, y, w, h, opts={}){
     s.addText(d,{x:x+0.25,y:cy+0.66,w:cw-0.5,h:0.72,fontFace:F,fontSize:11.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.15,valign:"top"});
     x+=cw+gap;
   });
-  // 기대효과 3측면
   const eff=[["기술·학문","방산-민간 스핀오프 선도 모델"],["사회·안전","원도심 골든타임 10분+ 단축"],["지역혁신","경남형 스마트시티·방산 도시"]];
   x=0.72;
-  eff.forEach(([tag,t],i)=>{
+  eff.forEach(([tag,t])=>{
     s.addShape(RR,{x,y:3.5,w:cw,h:1.35,rectRadius:0.09,fill:{color:"172033"},line:{color:C.border2,width:1}});
     s.addText(tag,{x:x+0.25,y:3.66,w:cw-0.5,h:0.35,fontFace:F,fontSize:12,color:C.sky,bold:true,margin:0});
     s.addText(t,{x:x+0.25,y:4.02,w:cw-0.5,h:0.72,fontFace:F,fontSize:14,color:C.onDark,bold:true,margin:0,valign:"top",lineSpacingMultiple:1.15});
     x+=cw+gap;
   });
-  // 마무리 배너
   s.addShape(RR,{x:0.72,y:5.15,w:11.88,h:1.55,rectRadius:0.1,fill:{color:"1F1206"},line:{color:C.orange,width:1.3}});
-  s.addText("데이터로 거점을 정하고, 편대가 골목을 먼저 지킨다",{x:1.0,y:5.4,w:11.3,h:0.5,fontFace:F,fontSize:20,color:C.orange,bold:true,margin:0});
-  s.addText("화재 빅데이터 분석 → 소방 드론 거점 선정 → SOP-D 현장 대응 → UGV 유무인 복합. 팀 군체 · 감사합니다. (Q&A)",
-    {x:1.0,y:6.0,w:11.3,h:0.5,fontFace:F,fontSize:13.5,color:C.onDarkMute,margin:0});
+  s.addText("데이터로 창원·거점을 정하고, 편대가 골목을 먼저 지킨다",{x:1.0,y:5.4,w:11.3,h:0.5,fontFace:F,fontSize:20,color:C.orange,bold:true,margin:0});
+  s.addText("최근 1년 화재 빅데이터 → 창원·거점 소방서 선정 → SOP-D 현장 대응 → UGV 유무인 복합. 팀 군체 · 감사합니다. (Q&A)",
+    {x:1.0,y:6.0,w:11.3,h:0.5,fontFace:F,fontSize:13,color:C.onDarkMute,margin:0});
 }
 
 const OUT=process.argv[2]||"deck3.pptx";
