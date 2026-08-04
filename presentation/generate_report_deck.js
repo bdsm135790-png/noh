@@ -174,26 +174,42 @@ function riskMap(s, x, y, w, h, opts={}){
   const px=0.6,py=1.8,pw=7.7,ph=4.55;
   card(s,px,py,pw,ph,C.card,C.border);
   const mx=px+0.25,my=py+0.25,mw=pw-0.5,mh=ph-0.85;
-  s.addShape(RECT,{x:mx,y:my,w:mw,h:mh,fill:{color:"EEF2F6"},line:{color:C.border,width:1}});
-  const blk=(bx,by,bw,bh)=>s.addShape(RECT,{x:mx+bx,y:my+by,w:bw,h:bh,fill:{color:"DDE3EA"},line:{color:"CBD5E1",width:0.75}});
-  [[0.4,0.4,1.3,0.9],[2.2,0.35,1.4,0.8],[5.0,0.45,1.4,0.9],[0.5,1.8,1.2,1.0],[3.6,1.7,1.3,1.1],[5.6,1.9,1.2,1.0],[1.9,2.6,1.3,0.7]].forEach(b=>blk(...b));
-  const road=(x1,y1,x2,y2,col,wd)=>s.addShape(LINE,{x:mx+x1,y:my+y1,w:x2-x1,h:y2-y1,line:{color:col,width:wd}});
-  road(0.2,1.55,mw-0.2,1.55,C.blue,4.5); road(2.0,0.2,2.0,mh-0.2,C.blue,4.5); road(4.9,1.55,4.9,mh-0.2,C.blue,4);
-  road(2.0,1.55,3.1,0.7,C.red,3.5); road(4.9,1.55,5.9,0.85,C.red,3.5); road(0.9,1.55,0.9,2.7,C.red,3.5); road(3.5,2.9,4.6,3.15,C.red,3.5); road(6.2,1.55,6.7,2.7,C.red,3.5);
-  const fire=(fx,fy)=>{ s.addShape(OVAL,{x:mx+fx-0.14,y:my+fy-0.14,w:0.28,h:0.28,fill:{color:C.orange},line:{color:C.red,width:1.5}}); };
-  fire(3.1,0.7); fire(5.9,0.85); fire(0.9,2.7); fire(4.6,3.15); fire(6.7,2.7);
-  s.addShape(OVAL,{x:mx+0.05,y:my+mh-0.55,w:0.4,h:0.4,fill:{color:"FFFFFF"},line:{color:C.blue,width:2.5}});
-  s.addShape(RECT,{x:mx+0.14,y:my+mh-0.46,w:0.22,h:0.22,fill:{color:C.blue},line:{type:"none"}});
-  s.addText("소방서",{x:mx-0.1,y:my+mh-0.16,w:0.7,h:0.22,align:"center",fontFace:F,fontSize:8,color:C.blue,bold:true,margin:0});
+  // 지도 배경 — 카카오 지도풍 베이지 (실제 시뮬레이터와 동일)
+  s.addShape(RECT,{x:mx,y:my,w:mw,h:mh,fill:{color:"F3EFE6"},line:{color:C.border2,width:1}});
+  // 대각선도 뒤집히지 않게 flip 처리하는 선 헬퍼(지도 로컬좌표)
+  const L=(x1,y1,x2,y2,line)=>{ const X=Math.min(x1,x2),Y=Math.min(y1,y2),w=Math.abs(x2-x1),h=Math.abs(y2-y1);
+    const anti=(x1<x2&&y1>y2)||(x1>x2&&y1<y2); s.addShape(LINE,{x:mx+X,y:my+Y,w,h,line,flipV:anti}); };
+  // 옅은 건물 덩어리
+  [[0.2,2.5,1.2,0.9],[1.7,2.6,1.15,0.85],[5.85,0.35,1.1,0.75]].forEach(([bx,by,bw,bh])=>
+    s.addShape(RECT,{x:mx+bx,y:my+by,w:bw,h:bh,fill:{color:"EAE4D8"},line:{type:"none"}}));
+  // 일반 도로(회색 실선)
+  [[0.0,2.3,mw,2.0],[1.5,0.1,1.9,mh],[3.1,0.2,3.5,mh],[0.15,1.02,mw-0.2,0.64],[4.2,1.75,4.6,mh],[2.0,2.9,mw-0.3,2.78]]
+    .forEach(([a,b,c,d])=>L(a,b,c,d,{color:"D3CCBD",width:2}));
+  // 간선(합포로) — 연노랑 굵은 밴드
+  L(0.1,0.62,mw-0.1,1.4,{color:"ECDC97",width:9});
+  s.addText("합포로",{x:mx+4.55,y:my+0.66,w:1.2,h:0.26,fontFace:F,fontSize:9,color:"A8925A",bold:true,margin:0});
+  // 소방차 주행경로 — 하늘색 실선(L자)
+  L(2.35,0.95,2.35,2.08,{color:"38BDF8",width:4.5}); L(2.35,2.08,4.7,2.2,{color:"38BDF8",width:4.5});
+  // 진입불가 골목 — 빨간 점선
+  const RD={color:C.red,width:2.5,dashType:"dash"};
+  L(4.75,2.2,4.75,mh-0.1,RD); L(4.75,2.2,6.5,1.75,RD); L(5.7,2.45,5.7,mh-0.1,RD); L(3.9,3.02,6.5,3.08,RD); L(3.3,2.55,4.75,2.2,RD);
+  // 화재 발생지점(🔥) + 마커
+  const firePin=(fx,fy)=>s.addShape(OVAL,{x:mx+fx-0.1,y:my+fy-0.1,w:0.2,h:0.2,fill:{color:C.red},line:{color:"FFFFFF",width:1.5}});
+  const fireEmoji=(fx,fy)=>s.addText("🔥",{x:mx+fx-0.18,y:my+fy-0.48,w:0.36,h:0.3,align:"center",fontFace:F,fontSize:12,margin:0});
+  s.addShape(RR,{x:mx+4.12,y:my+1.72,w:1.66,h:0.34,rectRadius:0.06,fill:{color:"FFFFFF"},line:{color:C.border2,width:1}});
+  s.addText("🔥 마산어시장",{x:mx+4.12,y:my+1.72,w:1.66,h:0.34,align:"center",valign:"middle",fontFace:F,fontSize:9.5,color:C.ink,bold:true,margin:0});
+  firePin(4.95,2.24);
+  firePin(6.3,2.98); fireEmoji(6.3,2.98); firePin(3.4,2.62); fireEmoji(3.4,2.62);
+  // 범례 (HTML 지도 표기와 동일)
   const ly=py+ph-0.42;
-  s.addShape(LINE,{x:px+0.3,y:ly+0.1,w:0.4,h:0,line:{color:C.red,width:3.5}}); s.addText("소방차 진입불가 경로",{x:px+0.78,y:ly-0.04,w:2.2,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
-  s.addShape(LINE,{x:px+3.0,y:ly+0.1,w:0.4,h:0,line:{color:C.blue,width:3.5}}); s.addText("진입가능 도로",{x:px+3.48,y:ly-0.04,w:1.7,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
-  dot(s,px+5.2,ly+0.02,0.18,C.orange,C.red); s.addText("화재 발생지점",{x:px+5.45,y:ly-0.04,w:1.9,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  s.addShape(LINE,{x:px+0.3,y:ly+0.1,w:0.42,h:0,line:{color:C.red,width:2.5,dashType:"dash"}}); s.addText("소방차 진입불가 골목",{x:px+0.8,y:ly-0.04,w:2.1,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  s.addShape(LINE,{x:px+2.95,y:ly+0.1,w:0.42,h:0,line:{color:"38BDF8",width:3.5}}); s.addText("소방차 주행경로",{x:px+3.45,y:ly-0.04,w:1.7,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
+  s.addText("🔥",{x:px+5.12,y:ly-0.09,w:0.3,h:0.34,align:"center",fontFace:F,fontSize:12,margin:0}); s.addText("화재 발생지점",{x:px+5.48,y:ly-0.04,w:1.9,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
   const steps=[
-    ["화재지점 표시","최근 1년 창원 화재 발생지점을 지도에 올린다",C.orange],
-    ["경로 탐색","각 지점까지 소방서에서 실측 도로망으로 경로를 찾는다",C.blue],
-    ["빨간선 = 진입불가","경로 중 폭 4m 미만 구간을 빨간선으로 표시한다",C.red],
-    ["드론 필요 지점","빨간선이 걸린 화재지점 = 드론이 가장 필요한 곳",C.violet],
+    ["화재지점 표시","최근 1년 창원 화재 발생지점(🔥)을 지도에 올린다",C.orange],
+    ["경로 탐색","소방서에서 각 지점까지 하늘색 주행경로를 그린다",C.blue],
+    ["빨간 점선 = 진입불가","경로 중 폭 4m 미만 구간을 빨간 점선으로 표시",C.red],
+    ["드론 필요 지점","빨간 점선이 걸린 화재지점 = 드론이 가장 필요한 곳",C.violet],
   ];
   let y=1.9;
   steps.forEach(([t,d,col],i)=>{
