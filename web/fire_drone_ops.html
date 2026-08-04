@@ -2016,6 +2016,44 @@ async function truckRoute(g){
     return {station:ts, sec:tSec, dist:tM, line};
   }catch(e){ return null; }
 }
+
+/* 그 위치의 실제 건물 형상(OSM building) → 로컬 미터 footprint */
+async function fetchBuilding(g){
+  try{
+    const {mLat,mLon}=metersPerDeg(g.lat), half=90;
+    const dLat=half/mLat, dLon=half/mLon;
+    const bbox=[(g.lon-dLon).toFixed(6),(g.lat-dLat).toFixed(6),
+                (g.lon+dLon).toFixed(6),(g.lat+dLat).toFixed(6)].join(',');
+    const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(),15000);
+    const res=await fetch(`https://api.openstreetmap.org/api/0.6/map?bbox=${bbox}`,{signal:ctrl.signal});
+    clearTimeout(to);
+    const doc=new DOMParser().parseFromString(await res.text(),'text/xml');
+    const nodes={}; doc.querySelectorAll('node').forEach(n=>
+      nodes[n.getAttribute('id')]=[+n.getAttribute('lat'),+n.getAttribute('lon')]);
+    const polys=[];
+    doc.querySelectorAll('way').forEach(w=>{
+      const tags={}; w.querySelectorAll('tag').forEach(t=>tags[t.getAttribute('k')]=t.getAttribute('v'));
+      if(!tags.building) return;
+      const pts=[...w.querySelectorAll('nd')].map(nd=>nodes[nd.getAttribute('ref')]).filter(Boolean)
+        .map(([la,lo])=>[ (lo-g.lon)*mLon, (g.lat-la)*mLat ]);   // x=동, z=남
+      if(pts.length<3) return;
+      const lv=parseInt(tags['building:levels']||'')||null;
+      polys.push({pts, levels:lv});
+    });
+    if(!polys.length) return null;
+    const inside=p=>{ let c=false, q=p.pts;
+      for(let i=0,j=q.length-1;i<q.length;j=i++){ const xi=q[i][0],zi=q[i][1],xj=q[j][0],zj=q[j][1];
+        if(((zi>0)!==(zj>0)) && (0<(xj-xi)*(0-zi)/(zj-zi)+xi)) c=!c; } return c; };
+    let pick=polys.find(inside);
+    if(!pick){ let bd=1e9; polys.forEach(p=>{ let cx=0,cz=0; p.pts.forEach(q=>{cx+=q[0];cz+=q[1];});
+      cx/=p.pts.length; cz/=p.pts.length; const d=cx*cx+cz*cz; if(d<bd){bd=d;pick=p;} }); }
+    // 너무 큰(대형 시설) 폴리곤은 제외해 과도한 스케일 방지
+    let mnx=1e9,mxx=-1e9,mnz=1e9,mxz=-1e9;
+    pick.pts.forEach(([x,z])=>{mnx=Math.min(mnx,x);mxx=Math.max(mxx,x);mnz=Math.min(mnz,z);mxz=Math.max(mxz,z);});
+    if(Math.max(mxx-mnx,mxz-mnz)>120) return null;
+    return {footprint:pick.pts, levels:pick.levels||2};
+  }catch(e){ return null; }
+}
 async function geocode(q){
   if(SAMPLES[q]) return {...SAMPLES[q], label:q, via:'샘플좌표'};
   try{
@@ -2063,8 +2101,13 @@ async function applySite(g){
   $('cmpNote').textContent='OSM 도로망·OSRM 경로 조회 중…';
   const droneFlight = bd / DRONE_SPEED;               // 드론 순수 비행시간(직선)
   $('cDrone').textContent = mmss(droneFlight);
-  const [roads, tr] = await Promise.all([drawRoads(g), truckRoute(g)]);
+  const [roads, tr, bld] = await Promise.all([drawRoads(g), truckRoute(g), fetchBuilding(g)]);
   TRUCK = tr;
+  SITE_FOOTPRINT = bld ? bld.footprint : null;        // 실제 건물 형상(있으면)
+  SITE_LEVELS = bld ? bld.levels : 2;
+  $('msg').innerHTML += bld
+    ? ` · <span style="color:#4ADE80">실제 건물 형상 로드(${bld.levels}층)</span>`
+    : ` · <span style="color:#64748B">OSM 건물 없음 → 기본 주택</span>`;
   if(tr){
     if(routeLine) map.removeLayer(routeLine);
     routeLine=L.polyline(tr.line,{color:'#38BDF8',weight:3.4,opacity:.9}).addTo(map);
@@ -2143,8 +2186,10 @@ function dispatch(){
 }
 function unlockSim(){
   simUnlocked=true; dispatched=true;
+  simDirty=true;                        // 새 출동 → 3D 시뮬 재구성/재시작
   $('tabSim').classList.remove('locked');
-  $('sideAddr').textContent = SITE ? `현장: ${SITE.label}` : '— SOP-D —';
+  const kind = SITE_FOOTPRINT? '실제 건물 형상' : '기본 2층 주택(OSM 건물 없음)';
+  $('sideAddr').textContent = (SITE ? `현장: ${SITE.label}` : '— SOP-D —') + ` · ${kind}`;
   gotoTab('sim');
 }
 
@@ -2175,84 +2220,120 @@ function squadTask(sq, phase){
 }
 
 let three={inited:false};
-// 건물 규모(실제 2층 단독주택, m)
-const HB={W:12,D:9,story:2.8,wall:5.6,ridge:8.0};
+let simDirty=false;
+let SITE_FOOTPRINT=null, SITE_LEVELS=2;   // OSM 실제 건물 형상(있으면)
+
+/* 현장(건물) 모델 — 실제 footprint 또는 기본 2층 주택. 건물 중심 = 원점(0,0). */
+function makeSite(footprint, levels){
+  let gable=false, fp=footprint;
+  if(!fp || fp.length<3){ gable=true;   // 기본 직사각형 단독주택
+    const W0=12,D0=9; fp=[[-W0/2,-D0/2],[W0/2,-D0/2],[W0/2,D0/2],[-W0/2,D0/2]];
+  }
+  let cx=0,cz=0; fp.forEach(p=>{cx+=p[0];cz+=p[1];}); cx/=fp.length; cz/=fp.length;
+  fp=fp.map(p=>[p[0]-cx,p[1]-cz]);      // 중심을 원점으로
+  let minX=1e9,maxX=-1e9,minZ=1e9,maxZ=-1e9;
+  fp.forEach(([x,z])=>{minX=Math.min(minX,x);maxX=Math.max(maxX,x);minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);});
+  const W=maxX-minX, D=maxZ-minZ;
+  const story=2.8, lv=Math.max(1,levels||2), wallH=story*lv, ridgeH=wallH+2.4;
+  const R=Math.max(W,D)/2+7, Z=(gable?ridgeH:wallH)+3.5;
+  // 화점/요구조자: 중심에서 서로 반대 코너로(내부 보장)
+  let fc=fp[0], vc=fp[0];
+  fp.forEach(p=>{ if(p[0]>fc[0])fc=p; if(p[0]<vc[0])vc=p; });
+  const fire=new THREE.Vector3(fc[0]*0.5, wallH*0.62, fc[1]*0.5);
+  const vic0=new THREE.Vector3(vc[0]*0.5, wallH*0.55, vc[1]*0.5);
+  const win={ kitchen:new THREE.Vector3(fire.x, wallH*0.6, minZ-1.8),
+              bed1:new THREE.Vector3(minX-1.8, wallH*0.6, vic0.z) };
+  const door=new THREE.Vector3(0,0.5, minZ+0.6), exit=new THREE.Vector3(0,0.4, minZ-6.5);
+  const pad=new THREE.Vector3(minX-10, 0, minZ-5);
+  const vicPath=[ vic0.clone(), new THREE.Vector3(vic0.x*0.5,1.2,(vic0.z+minZ)/2),
+                  door.clone(), exit.clone() ];
+  return {fp,W,D,story,wallH,ridgeH,gable,R,Z,fire,vic0,win,door,exit,pad,vicPath,minX,maxX,minZ,maxZ};
+}
+
+/* 건물 메쉬(그룹) — footprint 각 변을 벽으로 세우고 지붕을 덮는다. */
+function buildBuilding(S){
+  const g=new THREE.Group();
+  const wallMat=new THREE.MeshStandardMaterial({color:0xdbe4ee,transparent:true,opacity:0.15,side:THREE.DoubleSide});
+  const edgeMat=new THREE.LineBasicMaterial({color:0x94a3b8,transparent:true,opacity:0.6});
+  const N=S.fp.length;
+  for(let i=0;i<N;i++){
+    const a=S.fp[i], b=S.fp[(i+1)%N];
+    const len=Math.hypot(b[0]-a[0], b[1]-a[1]); if(len<0.1) continue;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(len, S.wallH), wallMat);
+    m.position.set((a[0]+b[0])/2, S.wallH/2, (a[1]+b[1])/2);
+    m.rotation.y=-Math.atan2(b[1]-a[1], b[0]-a[0]);
+    g.add(m);
+  }
+  // 바닥/층/상단 윤곽선
+  const loop=(y)=>{ const pts=[...S.fp,S.fp[0]].map(([x,z])=>new THREE.Vector3(x,y,z));
+    return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), edgeMat); };
+  g.add(loop(0.02)); g.add(loop(S.wallH));
+  if(S.story<S.wallH) g.add(loop(S.story));
+  // 지붕(삼각분할한 평면 또는 기본 박공)
+  const tri=THREE.ShapeUtils.triangulateShape(S.fp.map(([x,z])=>new THREE.Vector2(x,z)), []);
+  const verts=[]; tri.forEach(t=>t.forEach(idx=>{const [x,z]=S.fp[idx]; verts.push(x,S.wallH,z);}));
+  const rg=new THREE.BufferGeometry(); rg.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
+  rg.computeVertexNormals();
+  if(S.gable){
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(S.W,S.D)/2*1.02, S.ridgeH-S.wallH,4),
+      new THREE.MeshStandardMaterial({color:0xb45309,transparent:true,opacity:0.28}));
+    roof.position.set((S.minX+S.maxX)/2, S.wallH+(S.ridgeH-S.wallH)/2, (S.minZ+S.maxZ)/2);
+    roof.rotation.y=Math.PI/4; g.add(roof);
+    // 내벽 divider
+    const dv=new THREE.Mesh(new THREE.PlaneGeometry(S.D, S.wallH), wallMat.clone());
+    dv.position.set(0,S.wallH/2,0); dv.rotation.y=Math.PI/2; g.add(dv);
+  }else{
+    g.add(new THREE.Mesh(rg, new THREE.MeshStandardMaterial(
+      {color:0x64748b,transparent:true,opacity:0.24,side:THREE.DoubleSide})));
+  }
+  return g;
+}
 
 function buildScene(){
   const cv=$('three');
-  const scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0f172a);
-  const cam=new THREE.PerspectiveCamera(48, cv.clientWidth/cv.clientHeight, 0.1, 500);
-  cam.position.set(20,18,26);
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x0f172a);
+  const cam=new THREE.PerspectiveCamera(48, cv.clientWidth/cv.clientHeight, 0.1, 800);
   const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   const controls=new THREE.OrbitControls(cam, renderer.domElement);
-  controls.target.set(HB.W/2,2,HB.D/2); controls.enableDamping=true;
-
-  scene.add(new THREE.AmbientLight(0xffffff,0.75));
-  const dl=new THREE.DirectionalLight(0xffffff,0.7); dl.position.set(18,30,12); scene.add(dl);
-
-  // 지면
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(70,70),
+  controls.enableDamping=true;
+  scene.add(new THREE.AmbientLight(0xffffff,0.78));
+  const dl=new THREE.DirectionalLight(0xffffff,0.7); dl.position.set(20,34,14); scene.add(dl);
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(160,160),
     new THREE.MeshStandardMaterial({color:0x111c30}));
-  gnd.rotation.x=-Math.PI/2; gnd.position.set(HB.W/2,0,HB.D/2); scene.add(gnd);
-  // 그리드
-  const grid=new THREE.GridHelper(70,35,0x1e293b,0x16233b);
-  grid.position.set(HB.W/2,0.01,HB.D/2); scene.add(grid);
+  gnd.rotation.x=-Math.PI/2; scene.add(gnd);
+  const grid=new THREE.GridHelper(160,80,0x1e293b,0x16233b); grid.position.y=0.01; scene.add(grid);
+  three={inited:true, scene, cam, renderer, controls, cv, siteGroup:null,
+    fire:null, vic:null, units:[], site:null};
+  window.addEventListener('resize',resize3d);
+  rebuildSite();
+  resize3d();
+}
 
-  buildHouse(scene);
-
-  // 화점(2층 우측 방)
+/* 현장을 (재)구성 — 매 출동마다 호출되어 시뮬레이션을 리셋한다. */
+function rebuildSite(){
+  const S=makeSite(SITE_FOOTPRINT, SITE_LEVELS);
+  if(three.siteGroup) three.scene.remove(three.siteGroup);
+  const grp=new THREE.Group(); three.scene.add(grp);
+  grp.add(buildBuilding(S));
   const fire=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.6,1.6),
     new THREE.MeshStandardMaterial({color:0xef4444,emissive:0xef4444,emissiveIntensity:0.9,
       transparent:true,opacity:0.9}));
-  fire.position.set(9,HB.story+1.0,4.5); scene.add(fire);
-  // 요구조자
+  fire.position.copy(S.fire); grp.add(fire);
   const vic=new THREE.Mesh(new THREE.SphereGeometry(0.5,16,16),
     new THREE.MeshStandardMaterial({color:0x22d3ee,emissive:0x0891b2,emissiveIntensity:0.4}));
-  vic.position.set(3,HB.story+0.5,4.5); scene.add(vic);
-  // 대피 집결지
-  const exit=new THREE.Mesh(new THREE.CircleGeometry(1.1,24),
+  vic.position.copy(S.vic0); grp.add(vic);
+  const exit=new THREE.Mesh(new THREE.CircleGeometry(1.2,24),
     new THREE.MeshStandardMaterial({color:0x22c55e,transparent:true,opacity:0.55}));
-  exit.rotation.x=-Math.PI/2; exit.position.set(HB.W/2,0.03,-7); scene.add(exit);
-  // 드론 패드
-  const pad=new THREE.Mesh(new THREE.CircleGeometry(1.4,24),
+  exit.rotation.x=-Math.PI/2; exit.position.copy(S.exit); exit.position.y=0.03; grp.add(exit);
+  const pad=new THREE.Mesh(new THREE.CircleGeometry(1.5,24),
     new THREE.MeshStandardMaterial({color:0x334155}));
-  pad.rotation.x=-Math.PI/2; pad.position.set(-8.5,0.03,-6.5); scene.add(pad);
-
-  // 드론 생성
-  const units=makeUnits(scene);
-
-  three={inited:true,scene,cam,renderer,controls,fire,vic,exit,units,
-    fireLevel:1.0, cv};
-  window.addEventListener('resize',resize3d);
-  resize3d();
-}
-function houseMat(op){return new THREE.MeshStandardMaterial({color:0xdbe4ee,transparent:true,
-  opacity:op,side:THREE.DoubleSide});}
-function wall(scene,x,y,z,w,h,d,mat){
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
-  m.position.set(x,y,z); scene.add(m);
-  const edges=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),
-    new THREE.LineBasicMaterial({color:0x94a3b8,transparent:true,opacity:0.5}));
-  edges.position.copy(m.position); scene.add(edges);
-}
-function buildHouse(scene){
-  const {W,D,wall:H,story,ridge}=HB, t=0.25, mat=houseMat(0.16);
-  // 외벽 4면 (중심좌표)
-  wall(scene, W/2, H/2, t/2, W, H, t, mat);           // front
-  wall(scene, W/2, H/2, D-t/2, W, H, t, mat);          // back
-  wall(scene, t/2, H/2, D/2, t, H, D, mat);            // left
-  wall(scene, W-t/2, H/2, D/2, t, H, D, mat);          // right
-  // 2층 바닥 슬래브
-  wall(scene, W/2, story, D/2, W-t, 0.15, D-t, houseMat(0.14));
-  // 내벽 divider (양 층)
-  wall(scene, W/2, story/2, D/2, t, story, D, houseMat(0.20));
-  wall(scene, W/2, story+ (H-story)/2, D/2, t, H-story, D, houseMat(0.20));
-  // 박공(피라미드) 지붕
-  const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(W,D)/2*1.02, ridge-H, 4),
-    new THREE.MeshStandardMaterial({color:0xb45309,transparent:true,opacity:0.30}));
-  roof.position.set(W/2, H+(ridge-H)/2, D/2); roof.rotation.y=Math.PI/4; scene.add(roof);
+  pad.rotation.x=-Math.PI/2; pad.position.copy(S.pad); pad.position.y=0.03; grp.add(pad);
+  const units=makeUnits(grp, S);
+  three.site=S; three.siteGroup=grp; three.fire=fire; three.vic=vic; three.units=units;
+  three.controls.target.set(0, S.wallH*0.4, 0);
+  three.cam.position.set(S.R*1.7, S.Z*1.25, S.R*2.0);
+  resetSim();
 }
 
 /* 드론 메쉬 (편대별 형태·색 구분) */
@@ -2277,19 +2358,18 @@ function labelSprite(text,hex){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
   sp.scale.set(4.2,1.05,1); return sp;
 }
-const PAD=new THREE.Vector3(-8.5,0,-6.5);
-function makeUnits(scene){
-  const defs=[
-    {id:'GCS',sq:'GCS',label:'GCS',batt:100,state:'active',off:[3.5,1.2,3.5]},
-    {id:'정찰-A',sq:'RECON',label:'정찰-A',batt:42,state:'active',off:[0,1.2,2]},
-    {id:'정찰-B',sq:'RECON',label:'정찰-B(예비)',batt:100,state:'spare',off:[2.5,1.2,0]},
-    {id:'수색구조',sq:'SAR',label:'수색구조',batt:100,state:'active',off:[-2.5,1.2,2]},
-    {id:'진압',sq:'SUPPRESSION',label:'진압',batt:100,state:'active',off:[-2.5,1.2,-1]},
-    {id:'통신조명',sq:'COMMS',label:'통신조명',batt:100,state:'active',off:[0,1.2,-2.5]},
-  ];
-  return defs.map(d=>{
+const UNIT_DEFS=[
+  {id:'GCS',sq:'GCS',label:'GCS',batt:100,state:'active',off:[3.5,1.2,3.5]},
+  {id:'정찰-A',sq:'RECON',label:'정찰-A',batt:42,state:'active',off:[0,1.2,2]},
+  {id:'정찰-B',sq:'RECON',label:'정찰-B(예비)',batt:100,state:'spare',off:[2.5,1.2,0]},
+  {id:'수색구조',sq:'SAR',label:'수색구조',batt:100,state:'active',off:[-2.5,1.2,2]},
+  {id:'진압',sq:'SUPPRESSION',label:'진압',batt:100,state:'active',off:[-2.5,1.2,-1]},
+  {id:'통신조명',sq:'COMMS',label:'통신조명',batt:100,state:'active',off:[0,1.2,-2.5]},
+];
+function makeUnits(scene, S){
+  return UNIT_DEFS.map(d=>{
     const mesh=droneMesh(d.sq);
-    const p=PAD.clone().add(new THREE.Vector3(d.off[0],d.off[1],d.off[2]));
+    const p=S.pad.clone().add(new THREE.Vector3(d.off[0],d.off[1],d.off[2]));
     mesh.position.copy(p); scene.add(mesh);
     const lab=labelSprite(d.label,SQUADS[d.sq].hex); lab.position.copy(p).add(new THREE.Vector3(0,1.4,0));
     scene.add(lab);
@@ -2300,10 +2380,6 @@ function makeUnits(scene){
 /* ── 시뮬레이션 상태 머신 (house_mission.py 포팅) ── */
 const SCHED={deploy:10,assess:12,operate:30,clear:8};
 const TOTAL=SCHED.deploy+SCHED.assess+SCHED.operate+SCHED.clear; // 60
-const Z=HB.ridge+3, CX=HB.W/2, CZ=HB.D/2;
-const WIN={kitchen:new THREE.Vector3(9,HB.story+1.0,-1.0), bed1:new THREE.Vector3(-1.0,HB.story+1.0,4.5)};
-const VIC_PATH=[new THREE.Vector3(3,HB.story+0.4,4.5),new THREE.Vector3(2,1.2,2.5),
-                new THREE.Vector3(HB.W/2,0.6,0.0),new THREE.Vector3(HB.W/2,0.4,-7)];
 let sim={t:0, playing:true, relayStarted:null, relayDone:false, drops:0, lastDrop:-10, fireLevel:1};
 
 function phaseOf(step){
@@ -2312,44 +2388,50 @@ function phaseOf(step){
   if(step<=SCHED.deploy+SCHED.assess+SCHED.operate) return 'operate';
   return 'clear';
 }
-function perim(ang,y){return new THREE.Vector3(CX+11*Math.cos(ang),y,CZ+11*Math.sin(ang));}
-function vAt(step){
-  const op=SCHED.deploy+SCHED.assess;
+function perim(S,ang,y){return new THREE.Vector3(S.R*Math.cos(ang),y,S.R*Math.sin(ang));}
+function vAt(S,step){
+  const op=SCHED.deploy+SCHED.assess, P=S.vicPath;
   if(step<=op+6) return null;
   let prog=Math.min(1,(step-op-6)/(SCHED.operate+SCHED.clear-6));
-  let seg=prog*(VIC_PATH.length-1), i=Math.min(Math.floor(seg),VIC_PATH.length-2), f=seg-i;
-  return VIC_PATH[i].clone().lerp(VIC_PATH[i+1],f);
+  let seg=prog*(P.length-1), i=Math.min(Math.floor(seg),P.length-2), f=seg-i;
+  return P[i].clone().lerp(P[i+1],f);
+}
+function nextHeading(S,step){
+  const op=SCHED.deploy+SCHED.assess, P=S.vicPath;
+  let prog=Math.min(1,(step-op-6)/(SCHED.operate+SCHED.clear-6));
+  let seg=prog*(P.length-1), i=Math.min(Math.floor(seg),P.length-2);
+  const h=P[i+1].clone().sub(P[i]); h.y=0;
+  return h.lengthSq()>1e-6? h.normalize(): new THREE.Vector3();
 }
 
 function computeTargets(step){
+  const S=three.site, Z=S.Z, PAD=S.pad, WIN=S.win;
   const U=Object.fromEntries(three.units.map(u=>[u.id,u]));
   let phase=phaseOf(step);
-  // 릴레이 판정 (SOP 103-D)
   if(sim.relayStarted===null && U['정찰-A'].state==='active' && U['정찰-A'].batt<=25 && phase==='operate'){
     sim.relayStarted=step; U['정찰-B'].state='active'; U['정찰-A'].state='rth';
   }
   const relayActive=(sim.relayStarted!==null && !sim.relayDone && step<=sim.relayStarted+8);
   if(relayActive) phase='relay';
-  const ang=0.6*step, post=perim(ang,Z);
-  const vic=vAt(step);
+  const ang=0.6*step, post=perim(S,ang,Z);
+  const vic=vAt(S,step);
 
   U['GCS'].target.copy(PAD.clone().add(new THREE.Vector3(3.5,1.4,3.5)));
-  U['통신조명'].target.set(CX,Z+4,CZ);
+  U['통신조명'].target.set(0,Z+4,0);
 
   if(phase==='deploy'){
     U['정찰-A'].target.copy(post);
-    U['수색구조'].target.set(CX-11,Z,CZ+4);
-    U['진압'].target.set(CX+4,Z,CZ-11);
+    U['수색구조'].target.set(-S.R,Z,S.D*0.3);
+    U['진압'].target.set(S.R*0.4,Z,-S.R);
   } else if(phase==='assess'){
     U['정찰-A'].target.copy(post);
-    U['수색구조'].target.set(-3,Z,4.5);
-    U['진압'].target.set(9,Z,-3);
+    U['수색구조'].target.copy(WIN.bed1.clone().setY(Z));
+    U['진압'].target.copy(WIN.kitchen.clone().setY(Z));
   } else if(phase==='operate'||phase==='relay'){
     U['진압'].target.copy(WIN.kitchen.clone().add(new THREE.Vector3(0,0,-0.5)));
-    if(U['진압'].pos.distanceTo(WIN.kitchen)<2.6 && step-sim.lastDrop>=4 && sim.drops<3){
+    if(U['진압'].pos.distanceTo(WIN.kitchen)<3.0 && step-sim.lastDrop>=4 && sim.drops<3){
       sim.drops++; sim.lastDrop=step; sim.fireLevel=Math.max(0,sim.fireLevel-0.34);
     }
-    // 정찰 A/B
     if(U['정찰-A'].state==='rth'){
       U['정찰-A'].target.copy(PAD.clone().add(new THREE.Vector3(0,0.6,2)));
       if(new THREE.Vector2(U['정찰-A'].pos.x-PAD.x,U['정찰-A'].pos.z-PAD.z).length()<2){
@@ -2357,8 +2439,7 @@ function computeTargets(step){
       }
     } else U['정찰-A'].target.copy(post);
     U['정찰-B'].target.copy(U['정찰-B'].state==='active'?post:PAD.clone().add(new THREE.Vector3(2.5,1.2,0)));
-    // 수색구조: 요구조자 앞·위에서 인도
-    if(vic){ const head=nextHeading(step);
+    if(vic){ const head=nextHeading(S,step);
       U['수색구조'].target.copy(vic.clone().add(head.multiplyScalar(1.5)).add(new THREE.Vector3(0,3,0)));
     } else U['수색구조'].target.copy(WIN.bed1);
   } else { // clear
@@ -2366,16 +2447,9 @@ function computeTargets(step){
     U['정찰-B'].target.copy(post);
     U['진압'].target.copy(WIN.kitchen.clone().add(new THREE.Vector3(0,2,-2)));
     if(vic) U['수색구조'].target.copy(vic.clone().add(new THREE.Vector3(0,3,0)));
-    else U['수색구조'].target.set(HB.W/2,Z-2,-7);
+    else U['수색구조'].target.copy(S.exit.clone().setY(Z-2));
   }
   return {phase,vic};
-}
-function nextHeading(step){
-  const op=SCHED.deploy+SCHED.assess;
-  let prog=Math.min(1,(step-op-6)/(SCHED.operate+SCHED.clear-6));
-  let seg=prog*(VIC_PATH.length-1), i=Math.min(Math.floor(seg),VIC_PATH.length-2);
-  const h=VIC_PATH[i+1].clone().sub(VIC_PATH[i]); h.y=0;
-  return h.lengthSq()>1e-6? h.normalize(): new THREE.Vector3();
 }
 function drain(u){
   if(u.state==='active') u.batt=Math.max(0,u.batt-0.7);
@@ -2450,21 +2524,33 @@ function loop(now){
 function resetSim(){
   sim={t:0,playing:true,relayStarted:null,relayDone:false,drops:0,lastDrop:-10,fireLevel:1};
   lastStep=-1;
-  if(three.inited){
+  if(three.inited && three.site){
+    const S=three.site, offs=Object.fromEntries(UNIT_DEFS.map(d=>[d.id,d.off]));
     three.units.forEach(d=>{
       d.batt = d.id==='정찰-A'?42:100;
       d.state = d.id==='정찰-B'?'spare':'active'; d.drops=0;
-      const off = {'GCS':[3.5,1.2,3.5],'정찰-A':[0,1.2,2],'정찰-B':[2.5,1.2,0],
-        '수색구조':[-2.5,1.2,2],'진압':[-2.5,1.2,-1],'통신조명':[0,1.2,-2.5]}[d.id];
-      d.pos.copy(PAD.clone().add(new THREE.Vector3(off[0],off[1],off[2]))); d.target.copy(d.pos);
+      const off=offs[d.id];
+      d.pos.copy(S.pad.clone().add(new THREE.Vector3(off[0],off[1],off[2]))); d.target.copy(d.pos);
+      d.mesh.position.copy(d.pos); d.mesh.visible=true;
     });
+    if(three.fire){ three.fire.scale.setScalar(1); three.fire.material.opacity=0.9; }
   }
   $('play').textContent='⏸ 일시정지';
 }
 function onSimShown(){
-  if(!three.inited){ buildScene(); resetSim(); requestAnimationFrame(loop);
-    setTimeout(()=>{ $('loading').style.display='none'; }, 700);
-  } else resize3d();
+  if(!three.inited){
+    $('loading').style.display='flex';
+    buildScene(); requestAnimationFrame(loop);
+    setTimeout(()=>{ $('loading').style.display='none'; }, 600);
+  } else {
+    if(simDirty){                       // 새 출동 → 그 건물로 재구성 + 시뮬 재시작
+      $('loading').style.display='flex';
+      rebuildSite();
+      setTimeout(()=>{ $('loading').style.display='none'; }, 400);
+    }
+    resize3d();
+  }
+  simDirty=false;
 }
 $('play').onclick=()=>{ sim.playing=!sim.playing; $('play').textContent=sim.playing?'⏸ 일시정지':'▶ 재생'; };
 $('restart').onclick=resetSim;
