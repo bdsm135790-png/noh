@@ -331,7 +331,66 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addText("※ 수치는 예시 시나리오 — 거점·지점 거리에 따라 달라진다.",{x:0.6,y:5.35,w:12,h:0.35,fontFace:F,fontSize:10.5,color:C.dim,italic:true,margin:0});
 }
 
-/* ════════ ⑪ 편대 편성 ════════ */
+/* ════════ ⑪ 실제 시연 · 마산어시장 출동 지도 (다크) ════════ */
+{
+  const s=p.addSlide(); bg(s,C.dark);
+  const D={bg:"0B1220",card:"172033",bd:"334155",fuel:"334155",road:"38BDF8",roadDk:"1E3A5F",
+    red:"DC2626",redSoft:"FCA5A5",orange:"F97316",amber:"FB923C",green:"4ADE80",mute:"94A3B8",dim:"64748B",text:"E2E8F0",yellow:"FBBF24"};
+  s.addText("PART 2 · STEP 01 · 실제 시연",{x:0.6,y:0.42,w:12,h:0.3,fontFace:F,fontSize:12.5,color:C.violet,bold:true,charSpacing:3,margin:0});
+  s.addText("마산어시장 출동 — 현장 지도 표시",{x:0.6,y:0.72,w:12,h:0.6,fontFace:F,fontSize:26,color:D.text,bold:true,margin:0});
+  // 지도 패널
+  const px=0.6,py=1.7,pw=7.95,ph=4.95;
+  s.addShape(RR,{x:px,y:py,w:pw,h:ph,rectRadius:0.08,fill:{color:D.bg},line:{color:D.bd,width:1}});
+  const mx=px+0.25,my=py+0.25,mw=pw-0.5,mh=ph-0.85;
+  s.addShape(RECT,{x:mx,y:my,w:mw,h:mh,fill:{color:"0E1526"},line:{color:D.bd,width:1}});
+  // 건물 블록
+  const blk=(bx,by,bw,bh)=>s.addShape(RECT,{x:mx+bx,y:my+by,w:bw,h:bh,fill:{color:D.fuel},line:{type:"none"}});
+  [[0.4,0.4,1.1,0.8],[2.1,0.35,1.2,0.7],[4.9,0.5,1.2,0.8],[6.3,0.4,0.9,0.9],[0.5,1.7,1.0,0.9],[3.5,1.6,1.2,1.0],[5.5,1.9,1.1,0.9],[1.8,2.7,1.1,0.7],[4.2,2.9,1.2,0.7]].forEach(b=>blk(...b));
+  const road=(x1,y1,x2,y2,col,wd,dash)=>s.addShape(LINE,{x:mx+x1,y:my+y1,w:x2-x1,h:y2-y1,line:{color:col,width:wd,dashType:dash||"solid"}});
+  // 진입가능 파란 도로
+  road(0.2,1.5,mw-0.2,1.5,D.road,3.5); road(2.0,0.2,2.0,mh-0.2,D.road,3.5); road(4.8,1.5,4.8,mh-0.2,D.road,3);
+  // 소방차 실도로 경로(파랑, 굵게) — 거점→간선까지
+  road(0.55,mh-0.55,2.0,1.5,"0EA5E9",3.5);
+  // 진입불가 빨간 골목
+  road(2.0,1.5,3.2,0.7,D.red,3); road(4.8,1.5,5.8,0.9,D.red,3); road(0.9,1.5,0.9,2.6,D.red,3);
+  road(3.4,2.9,4.5,3.2,D.red,3); road(6.2,1.5,6.7,2.6,D.red,3);
+  // 드론 직선 경로(주황 점선) 거점→발화점
+  road(0.55,mh-0.55,5.35,0.62,D.orange,2.5,"dash");
+  // 발화점(마산어시장)
+  s.addShape(OVAL,{x:mx+5.35-0.16,y:my+0.62-0.16,w:0.32,h:0.32,fill:{color:D.orange},line:{color:D.yellow,width:2}});
+  s.addShape(RR,{x:mx+4.5,y:my+0.12,w:1.75,h:0.34,rectRadius:0.08,fill:{color:"1A0E06"},line:{color:D.orange,width:1}});
+  s.addText("마산어시장 발화점",{x:mx+4.5,y:my+0.12,w:1.75,h:0.34,align:"center",valign:"middle",fontFace:F,fontSize:9.5,color:D.amber,bold:true,margin:0});
+  // 소방서
+  s.addShape(OVAL,{x:mx+0.4,y:my+mh-0.7,w:0.34,h:0.34,fill:{color:"0B1220"},line:{color:D.road,width:2.5}});
+  s.addShape(RECT,{x:mx+0.48,y:my+mh-0.62,w:0.18,h:0.18,fill:{color:D.road},line:{type:"none"}});
+  s.addText("마산소방서 거점",{x:mx+0.05,y:my+mh-0.32,w:1.9,h:0.24,fontFace:F,fontSize:9,color:D.road,bold:true,margin:0});
+  // 범례
+  const ly=py+ph-0.44;
+  s.addShape(LINE,{x:px+0.3,y:ly+0.1,w:0.4,h:0,line:{color:D.red,width:3}});
+  s.addText("소방차 진입불가 경로",{x:px+0.78,y:ly-0.03,w:2.0,h:0.3,fontFace:F,fontSize:9.5,color:D.mute,margin:0,valign:"middle"});
+  s.addShape(LINE,{x:px+2.95,y:ly+0.1,w:0.4,h:0,line:{color:D.road,width:3}});
+  s.addText("진입가능 도로",{x:px+3.43,y:ly-0.03,w:1.5,h:0.3,fontFace:F,fontSize:9.5,color:D.mute,margin:0,valign:"middle"});
+  s.addShape(LINE,{x:px+5.0,y:ly+0.1,w:0.4,h:0,line:{color:D.orange,width:2.5,dashType:"dash"}});
+  s.addText("드론 직선 경로",{x:px+5.48,y:ly-0.03,w:1.6,h:0.3,fontFace:F,fontSize:9.5,color:D.mute,margin:0,valign:"middle"});
+  // 우: 출동 요약 (실측)
+  const rx=8.75, rw=3.95;
+  s.addShape(RR,{x:rx,y:1.7,w:rw,h:2.85,rectRadius:0.09,fill:{color:D.card},line:{color:D.bd,width:1}});
+  s.addText("출동 요약",{x:rx+0.3,y:1.88,w:rw-0.6,h:0.35,fontFace:F,fontSize:14,color:D.text,bold:true,margin:0});
+  const rows=[["현장","마산어시장",D.amber],["최근접 거점","마산소방서 · 직선 1.33km",D.road],["드론 도착","1분 00초",D.orange],["소방차","진입불가 골목 다수 · 호스 연장",D.redSoft]];
+  let yy=2.34;
+  rows.forEach(([k,v,col])=>{
+    s.addText(k,{x:rx+0.3,y:yy,w:1.5,h:0.3,fontFace:F,fontSize:10.5,color:D.dim,margin:0});
+    s.addText(v,{x:rx+1.55,y:yy,w:rw-1.75,h:0.34,fontFace:F,fontSize:11.5,color:col,bold:true,margin:0});
+    yy+=0.52;
+  });
+  s.addShape(RR,{x:rx,y:4.7,w:rw,h:1.95,rectRadius:0.09,fill:{color:"0C1F16"},line:{color:"166534",width:1}});
+  s.addText("드론이 먼저 도착",{x:rx+0.3,y:4.9,w:rw-0.6,h:0.4,fontFace:F,fontSize:14,color:D.green,bold:true,margin:0});
+  s.addText([{text:"소방차가 못 가는 골목(빨간선)을 드론이 상공으로 그대로 넘어 ",options:{color:D.mute}},{text:"1분 만에 화점 도착",options:{color:D.green,bold:true}},{text:" — 초동 골든타임 확보.",options:{color:D.mute}}],
+    {x:rx+0.3,y:5.32,w:rw-0.6,h:1.2,fontFace:F,fontSize:11.5,margin:0,lineSpacingMultiple:1.25,valign:"top"});
+  s.addNotes("마산어시장 발화점 지정 시 최근접 거점 마산소방서(1.33km) 자동 선정, 드론 1분 도착. 소방차 진입불가 골목은 빨간선으로 표시.");
+}
+
+/* ════════ ⑫ 편대 편성 ════════ */
 {
   const s=p.addSlide(); bg(s);
   header(s,"PART 2 · STEP 02","도착 즉시 — 5개 편대로 전개",C.violet);
@@ -381,43 +440,14 @@ function riskMap(s, x, y, w, h, opts={}){
     {x:0.6,y:6.35,w:12.1,h:0.4,align:"center",fontFace:F,fontSize:12,color:C.mute,italic:true,margin:0});
 }
 
-/* ════════ ⑬ 3D 현장 대응 ════════ */
+/* ════════ ⑬ 3D 현장 대응 (실제 시연 캡처) ════════ */
 {
-  const s=p.addSlide(); bg(s);
-  header(s,"PART 2 · STEP 04","현장 정밀 대응 · 2층 주택 화재",C.violet);
-  const px=0.7,py=1.85,pw=5.5,ph=4.5;
-  card(s,px,py,pw,ph,C.panel2,C.border);
-  s.addShape(RECT,{x:px+0.2,y:py+ph-0.7,w:pw-0.4,h:0.05,fill:{color:C.border2},line:{type:"none"}});
-  const hx=px+1.55,hw=2.5,hFloor=1.35,hy=py+ph-0.7-2*hFloor;
-  s.addShape(RECT,{x:hx,y:hy,w:hw,h:2*hFloor,fill:{color:"E7ECF2"},line:{color:C.border2,width:1.5}});
-  s.addShape(TRI,{x:hx-0.25,y:hy-0.8,w:hw+0.5,h:0.8,fill:{color:"94A3B8"},line:{type:"none"}});
-  s.addShape(LINE,{x:hx,y:hy+hFloor,w:hw,h:0,line:{color:C.border2,width:1}});
-  const win=(wx,wy,col)=>s.addShape(RECT,{x:wx,y:wy,w:0.5,h:0.5,fill:{color:col},line:{color:C.border2,width:1}});
-  win(hx+0.35,hy+hFloor+0.45,C.blueL); win(hx+1.65,hy+hFloor+0.45,C.blueL);
-  s.addShape(RECT,{x:hx+1.0,y:hy+2*hFloor-0.75,w:0.5,h:0.75,fill:{color:"CBD5E1"},line:{color:C.border2,width:1}});
-  s.addShape(OVAL,{x:hx+0.42,y:hy+0.4,w:0.4,h:0.4,fill:{color:"22D3EE"},line:{color:"0891B2",width:1}});
-  s.addShape(RECT,{x:hx+1.6,y:hy+0.35,w:0.55,h:0.55,fill:{color:C.orange},line:{color:"B45309",width:1.5}});
-  dot(s,hx+hw+0.55,hy-1.05,0.24,C.violet,"FFFFFF");
-  dot(s,hx+2.25,hy+0.45,0.24,C.blue,"FFFFFF");
-  dot(s,hx+0.1,hy+0.5,0.24,C.sky,"FFFFFF");
-  dot(s,hx-0.7,hy-0.85,0.24,C.amber,"FFFFFF");
-  s.addShape(OVAL,{x:px+0.55,y:py+ph-0.52,w:0.7,h:0.26,fill:{color:"22C55E"},line:{type:"none"}});
-  s.addText("대피 집결지",{x:px+0.35,y:py+ph-0.28,w:1.5,h:0.24,align:"center",fontFace:F,fontSize:8.5,color:C.green,bold:true,margin:0});
-  s.addText("Three.js 3D · 실제 2층 단독주택 규모",{x:px,y:py+ph+0.05,w:pw,h:0.28,align:"center",fontFace:F,fontSize:10,color:C.dim,margin:0});
-  const acts=[
-    ["1편대 공중정찰","2층 우측 방 화점을 열화상으로 탐지",C.violet],
-    ["3편대 화재진압","창문 파쇄 후 화점에 정밀 소화탄 투하",C.blue],
-    ["2편대 인명수색·구조","2층 좌측 요구조자 앞·위에서 대피 인도",C.sky],
-    ["4편대 통신중계·조명","고공에서 Mesh 통신 중계 · 광역 조명",C.amber],
-  ];
-  let y=1.9;
-  acts.forEach(([t,d,col])=>{
-    flatCard(s,6.5,y,6.2,1.02,C.panel2);
-    dot(s,6.75,y+0.36,0.3,col);
-    s.addText(t,{x:7.2,y:y+0.14,w:5.3,h:0.35,fontFace:F,fontSize:13.5,color:col,bold:true,margin:0});
-    s.addText(d,{x:7.2,y:y+0.5,w:5.35,h:0.45,fontFace:F,fontSize:11,color:C.body,margin:0});
-    y+=1.12;
-  });
+  const s=p.addSlide(); bg(s,C.dark);
+  s.addText("PART 2 · STEP 04 · 실제 시연 캡처",{x:0.6,y:0.42,w:12.1,h:0.3,fontFace:F,fontSize:12.5,color:C.violet,bold:true,charSpacing:3,margin:0});
+  s.addText("3D 건물 SOP-D 대응 · 마산어시장",{x:0.6,y:0.72,w:12.1,h:0.6,fontFace:F,fontSize:26,color:C.onDark,bold:true,margin:0});
+  s.addImage({ path:"cap_3d_crop.png", x:0.75, y:1.5, w:11.83, h:5.24 });
+  s.addText("정찰(열화상 화점 탐지) · 진압(창문 파쇄·정밀 소화탄) · 인명수색구조(대피 인도) · 통신중계·조명 편대가 SOP-D 단계별로 동시에 자율 수행 — 실제 시뮬레이션 화면.",
+    {x:0.75,y:6.82,w:11.83,h:0.5,fontFace:F,fontSize:11.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.1});
 }
 
 /* ════════ ⑭ UGV + 기대효과 마무리 (다크) ════════ */
