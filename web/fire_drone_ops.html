@@ -2094,6 +2094,9 @@ async function applySite(g){
     `최근접 거점 <b style="color:#38BDF8">${STATIONS[bi].name}</b> · 직선 ${(bd/1000).toFixed(2)} km<br>`+
     `<span class="s">출동 버튼을 누르면 드론이 현장으로 비행합니다.</span>`;
   $('dispatchSec').style.display='';
+  // 새 현장 → 출동 버튼 초기화(이전 출동에서 비활성화된 상태 복구).
+  $('go').disabled=false; $('go').textContent='🚁 드론 군집 출동';
+  droneLayer.clearLayers();
 
   // ── 소방차: 진입 가능/불가 도로 + 실도로 경로·이동시간 ──
   $('cmpSec').style.display='';
