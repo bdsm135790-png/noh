@@ -106,11 +106,11 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s);
   header(s,"PART 1 · STEP 01","화재 관련 데이터를 모은다");
   const data=[
-    ["화재 발생 빈도","소방안전 빅데이터 플랫폼","최근 1년 시·군구별 화재 건수",C.red,C.redL],
-    ["도로폭·도로망","지자체 · OSM","골목 폭 · 소방차 진입 가능성",C.orange,C.orangeL],
-    ["건축물대장","국가공간정보포털","노후 건축물 비율 → 취약 지수",C.violet,C.violetL],
-    ["고령·인구","통계청 KOSIS·SGIS","65세+ 교통약자 밀집 지역",C.blue,C.blueL],
-    ["소방용수·진입곤란","공공데이터포털","소화전 · 진입곤란 구간 현황",C.green,C.greenL],
+    ["화재 발생 빈도","소방안전 빅데이터 플랫폼","최근 1년 시·군구별\n화재 건수",C.red,C.redL],
+    ["도로폭·도로망","지자체 · OSM","골목 폭·소방차\n진입 가능성",C.orange,C.orangeL],
+    ["건축물대장","국가공간정보포털","노후 건축물 비율\n→ 취약 지수",C.violet,C.violetL],
+    ["고령·인구","통계청 KOSIS·SGIS","65세+ 교통약자\n밀집 지역",C.blue,C.blueL],
+    ["소방용수·진입곤란","공공데이터포털","소화전·진입곤란\n구간 현황",C.green,C.greenL],
   ];
   let x=0.6; const cw=2.4, gap=0.15, cy=1.85, ch=3.0;
   data.forEach(([t,src,use,col,fl])=>{
@@ -158,9 +158,9 @@ function riskMap(s, x, y, w, h, opts={}){
      valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:145, barGapWidthPct:55});
   card(s,8.55,1.95,4.15,4.35,C.panel2,C.border);
   s.addText("읽는 법",{x:8.85,y:2.2,w:3.6,h:0.35,fontFace:F,fontSize:14,color:C.orange,bold:true,margin:0});
-  ["구별 화재건수는 88~126건으로 비슷","차이는 도로·노후·인명피해에서 갈린다","마산합포구는 인명피해가 창원 최다"].forEach((t,i)=>{
-    dot(s,8.9,2.78+i*0.62,0.15,C.orange);
-    s.addText(t,{x:9.2,y:2.62+i*0.62,w:3.3,h:0.6,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle",lineSpacingMultiple:1.1});
+  ["구별 화재건수는\n88~126건으로 비슷","차이는 도로·노후·\n인명피해에서 갈린다","마산합포구는\n인명피해가 창원 최다"].forEach((t,i)=>{
+    dot(s,8.9,2.72+i*0.62,0.15,C.orange);
+    s.addText(t,{x:9.2,y:2.5+i*0.62,w:3.3,h:0.62,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle",lineSpacingMultiple:1.1});
   });
   flatCard(s,8.85,4.75,3.6,1.3,C.redL,"FCA5A5");
   s.addText("마산합포구",{x:9.1,y:4.9,w:3.1,h:0.35,fontFace:F,fontSize:12,color:C.red,bold:true,margin:0});
@@ -206,10 +206,10 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addShape(LINE,{x:px+2.95,y:ly+0.1,w:0.42,h:0,line:{color:"38BDF8",width:3.5}}); s.addText("소방차 주행경로",{x:px+3.45,y:ly-0.04,w:1.7,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
   s.addText("🔥",{x:px+5.12,y:ly-0.09,w:0.3,h:0.34,align:"center",fontFace:F,fontSize:12,margin:0}); s.addText("화재 발생지점",{x:px+5.48,y:ly-0.04,w:1.9,h:0.3,fontFace:F,fontSize:10,color:C.body,margin:0,valign:"middle"});
   const steps=[
-    ["화재지점 표시","최근 1년 창원 화재 발생지점(🔥)을 지도에 올린다",C.orange],
-    ["경로 탐색","소방서에서 각 지점까지 하늘색 주행경로를 그린다",C.blue],
-    ["빨간 점선 = 진입불가","경로 중 폭 4m 미만 구간을 빨간 점선으로 표시",C.red],
-    ["드론 필요 지점","빨간 점선이 걸린 화재지점 = 드론이 가장 필요한 곳",C.violet],
+    ["화재지점 표시","최근 1년 창원 화재 발생지점(🔥)을\n지도에 올린다",C.orange],
+    ["경로 탐색","소방서에서 각 지점까지\n하늘색 주행경로를 그린다",C.blue],
+    ["빨간 점선 = 진입불가","경로 중 폭 4m 미만 구간을\n빨간 점선으로 표시",C.red],
+    ["드론 필요 지점","빨간 점선이 걸린 화재지점 =\n드론이 가장 필요한 곳",C.violet],
   ];
   let y=1.9;
   steps.forEach(([t,d,col],i)=>{
@@ -336,11 +336,11 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s);
   header(s,"PART 2 · STEP 03","SOP-D 표준 행동요령 · 5단계",C.violet);
   const phases=[
-    ["전개","DEPLOY","정찰·진압·구조 편대 전개·상승","101-D","6366F1"],
-    ["정찰·평가","ASSESS","3D 스캐닝·열화상 화점/진입점 파악","102-D",C.sky],
-    ["작전","OPERATE","창문 파쇄 후 정밀 소화탄 · 대피 인도","222-D",C.orange],
-    ["중계·호위","RELAY","요구조자 호위 · 외벽 연소차단 · 배터리 릴레이","105-D",C.red],
-    ["종결","CLEAR","대피 완료 확인 · 잔불 감시 · RTH","113-D",C.green],
+    ["전개","DEPLOY","정찰·진압·구조\n편대 전개·상승","101-D","6366F1"],
+    ["정찰·평가","ASSESS","3D 스캐닝·열화상\n화점/진입점 파악","102-D",C.sky],
+    ["작전","OPERATE","창문 파쇄 후\n정밀 소화탄·대피 인도","222-D",C.orange],
+    ["중계·호위","RELAY","요구조자 호위\n외벽 연소차단·릴레이","105-D",C.red],
+    ["종결","CLEAR","대피 완료 확인\n잔불 감시·RTH","113-D",C.green],
   ];
   const n=5, gap=0.25, cw=(12.1-gap*(n-1))/n, cy=2.0, ch=3.85;
   let x=0.6;
@@ -363,9 +363,9 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s);
   header(s,"PART 2 · STEP 04","유무인 복합 — 지상 무인차량(UGV) 협업",C.violet);
   const roles=[
-    ["지상 무인차량(UGV)","장애물 극복 · 소화수 보급 · 스마트 방재 거점에서 출발·재보급",C.green,C.greenL],
-    ["드론 편대","상공에서 정밀 정찰·진압 — 골목 위를 그대로 넘는다",C.violet,C.violetL],
-    ["유무인 복합 편대","UGV는 지상 보급·거점, 드론은 공중 타격 — 상호 통신으로 한 편대처럼",C.orange,C.orangeL],
+    ["지상 무인차량(UGV)","장애물 극복·소화수 보급 ·\n스마트 방재 거점에서 출발·재보급",C.green,C.greenL],
+    ["드론 편대","상공에서 정밀 정찰·진압 —\n골목 위를 그대로 넘는다",C.violet,C.violetL],
+    ["유무인 복합 편대","UGV는 지상 보급·거점,\n드론은 공중 타격 — 한 편대처럼",C.orange,C.orangeL],
   ];
   let x=0.6; const cw=3.9, gap=0.2, cy=1.9, ch=2.9;
   roles.forEach(([t,d,col,fl])=>{
@@ -435,9 +435,9 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addText("도착시간별 건당 재산피해 (천원)",{x:0.6,y:5.62,w:5.6,h:0.3,align:"center",fontFace:F,fontSize:10.5,color:C.mute,margin:0});
   // 우: 3 스탯
   const stats=[
-    ["재산피해","2.1배 ↑","도착 5분 → 5~10분 (건당 5,425 → 11,198천원)",C.red],
-    ["사망률","2.5배 ↑","현장도착 10분 초과 시 (10분 이하 대비)",C.orange],
-    ["사망 확률","4배 ↓","5분 이내 골든타임 확보 시",C.green],
+    ["재산피해","2.1배 ↑","도착 5분 → 5~10분\n(건당 5,425 → 11,198천원)",C.red],
+    ["사망률","2.5배 ↑","현장도착 10분 초과 시\n(10분 이하 대비)",C.orange],
+    ["사망 확률","4배 ↓","5분 이내\n골든타임 확보 시",C.green],
   ];
   let y=2.0;
   stats.forEach(([t,v,d,col])=>{
@@ -462,9 +462,9 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s,C.dark);
   headerDark(s,"기대효과","기술 · 사회 · 지역, 그리고 마무리",C.green);
   const eff=[
-    ["기술·학문","방산-민간 스핀오프 선도","기계공학 제어·역학 + 국방과학 자율 군집 운용의 고가치 융합 사례",C.violet],
-    ["사회·안전","원도심 골든타임 확보","진입불가 골목도 5분 내 초동 대응 → 재산피해 약 52%↓·인명 위험 대폭 감소",C.orange],
-    ["지역 혁신","경남형 스마트시티·방산","방위산업·항공우주 인프라를 스마트시티에 결합한 지역 특화 혁신",C.sky],
+    ["기술·학문","방산-민간 스핀오프 선도","기계공학 제어·역학과\n국방과학 자율 군집 운용의 융합",C.violet],
+    ["사회·안전","원도심 골든타임 확보","진입불가 골목도 5분 내 초동 대응\n→ 재산피해 약 52%↓·인명 위험 감소",C.orange],
+    ["지역 혁신","경남형 스마트시티·방산","방위산업·항공우주 인프라를\n스마트시티에 결합한 지역 특화 혁신",C.sky],
   ];
   let x=0.6; const cw=3.97, gap=0.2, cy=1.9, ch=3.0;
   eff.forEach(([tag,t,d,col])=>{
