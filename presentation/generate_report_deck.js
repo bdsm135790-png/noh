@@ -83,6 +83,58 @@ function riskMap(s, x, y, w, h, opts={}){
     {x:0.75,y:6.55,w:11,h:0.4,fontFace:F,fontSize:12.5,margin:0});
 }
 
+/* ═══ 도입① 문제 인식 · 문제 제기 (다크) ═══ */
+{
+  const s=p.addSlide(); bg(s,C.dark);
+  s.addText("문제 인식 · WHY",{x:0.6,y:0.5,w:11,h:0.32,fontFace:F,fontSize:12.5,color:C.red,bold:true,charSpacing:3,margin:0});
+  s.addText("소방차가 닿지 못하는 곳에서, 사람이 죽는다",{x:0.6,y:0.82,w:12.1,h:0.7,fontFace:F,fontSize:28,color:C.onDark,bold:true,margin:0});
+  const cases=[
+    ["노후 주거 · 고령 인명 위험", C.orange, "마산합포구 자산동 노후 빌라 새벽 화재",
+      "2층서 발화 → 90대 여성 사망 · 50대 중상 · 주민 18명 대피.\n새벽·고령 단독 거주라 스스로 대피가 어려웠다."],
+    ["진입 지연 = 피해 급증", C.red, "좁은 골목·불법주차로 늦은 소방차",
+      "불법주차로 소방관이 현장 150m 밖부터 호스를 끌고 진입.\n제천 화재는 진입 30여 분 지연 → 29명 사망."],
+  ];
+  let x=0.6; const cw=6.0, gap=0.1, cy=1.75, ch=2.95;
+  cases.forEach(([tag,col,t,d])=>{
+    s.addShape(RR,{x,y:cy,w:cw,h:ch,rectRadius:0.1,fill:{color:"172033"},line:{color:col,width:1.3}});
+    chip(s,x+0.3,cy+0.3,2.5,tag,col,"0B1220");
+    s.addText(t,{x:x+0.3,y:cy+0.98,w:cw-0.6,h:0.5,fontFace:F,fontSize:16.5,color:C.onDark,bold:true,margin:0});
+    s.addText(d,{x:x+0.3,y:cy+1.55,w:cw-0.6,h:1.25,fontFace:F,fontSize:12.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.3,valign:"top"});
+    x+=cw+gap;
+  });
+  s.addShape(RR,{x:0.6,y:5.0,w:12.1,h:1.12,rectRadius:0.1,fill:{color:"1A0E06"},line:{color:C.amber,width:1.2}});
+  s.addText([{text:"골든타임을 놓치면 피해가 급증한다.  ",options:{color:"FBBF24",bold:true}},
+    {text:"현장도착 5분 초과 시 건당 재산피해 5,425 → 11,198천원, 10분 초과 시 사망률 약 2.5배.",options:{color:C.onDarkMute}}],
+    {x:0.9,y:5.0,w:11.5,h:1.12,valign:"middle",fontFace:F,fontSize:13.5,margin:0,lineSpacingMultiple:1.15});
+  s.addText("출처: 소방청 국가화재정보시스템(NFDS)·골든타임 연구 / 창원 마산합포 빌라 화재·진입지연 사례는 언론 보도.",
+    {x:0.6,y:6.26,w:12.1,h:0.3,fontFace:F,fontSize:9,color:C.dim,italic:true,margin:0});
+  s.addNotes("실제 사례로 문제 각인. 자산동 빌라=노후 주거·고령 인명 위험, 진입지연=별도 사례(제천 29명)로 구분해 설명.");
+}
+
+/* ═══ 도입② 문제 인식 · 세 개의 벽 (라이트) ═══ */
+{
+  const s=p.addSlide(); bg(s);
+  header(s,"문제 인식 · 무엇이 골든타임을 막나","초동 대응을 막는 세 개의 벽",C.red);
+  const walls=[
+    ["1","진입 불가·지연","폭 4m 미만 골목 + 불법주차로\n소방차가 못 가거나 늦게 도착한다",C.red,C.redL],
+    ["2","대피 취약","고령·노후 주거 밀집·새벽 단독 거주 —\n스스로 대피 어렵고 초동 정찰·안내 공백",C.orange,C.orangeL],
+    ["3","기존 소방드론 한계","조종사 1명이 드론 1기만 운용 —\n급확산 대형 재난 입체 대응 불가",C.blue,C.blueL],
+  ];
+  let x=0.6; const cw=3.9, gap=0.2, cy=1.9, ch=3.0;
+  walls.forEach(([n,t,d,col,fl])=>{
+    card(s,x,cy,cw,ch);
+    s.addShape(OVAL,{x:x+0.3,y:cy+0.32,w:0.66,h:0.66,fill:{color:fl},line:{type:"none"}});
+    s.addText(n,{x:x+0.3,y:cy+0.32,w:0.66,h:0.66,align:"center",valign:"middle",fontFace:FM,fontSize:22,color:col,bold:true,margin:0});
+    s.addText(t,{x:x+1.1,y:cy+0.4,w:cw-1.3,h:0.5,valign:"middle",fontFace:F,fontSize:15.5,color:C.ink,bold:true,margin:0});
+    s.addText(d,{x:x+0.3,y:cy+1.25,w:cw-0.6,h:1.6,fontFace:F,fontSize:12.5,color:C.body,margin:0,lineSpacingMultiple:1.3,valign:"top"});
+    x+=cw+gap;
+  });
+  card(s,0.6,5.15,12.1,1.2,"0C1F16","166534");
+  s.addText([{text:"→ 소방차가 진입하기 전, 자율 군집 드론이 초동을 채운다.  ",options:{color:C.green,bold:true}},
+    {text:"어디에 둘지(PART 1) · 도착 후 어떻게 움직일지(PART 2)를 데이터로 설계한다.",options:{color:C.body}}],
+    {x:0.9,y:5.15,w:11.5,h:1.2,valign:"middle",fontFace:F,fontSize:14,margin:0,lineSpacingMultiple:1.2});
+}
+
 /* ═══ ② PART 1 표지 ═══ */
 {
   const s=p.addSlide(); bg(s,C.dark);
@@ -196,8 +248,8 @@ function riskMap(s, x, y, w, h, opts={}){
   // 화재 발생지점(🔥) + 마커
   const firePin=(fx,fy)=>s.addShape(OVAL,{x:mx+fx-0.1,y:my+fy-0.1,w:0.2,h:0.2,fill:{color:C.red},line:{color:"FFFFFF",width:1.5}});
   const fireEmoji=(fx,fy)=>s.addText("🔥",{x:mx+fx-0.18,y:my+fy-0.48,w:0.36,h:0.3,align:"center",fontFace:F,fontSize:12,margin:0});
-  s.addShape(RR,{x:mx+4.12,y:my+1.72,w:1.66,h:0.34,rectRadius:0.06,fill:{color:"FFFFFF"},line:{color:C.border2,width:1}});
-  s.addText("🔥 마산어시장",{x:mx+4.12,y:my+1.72,w:1.66,h:0.34,align:"center",valign:"middle",fontFace:F,fontSize:9.5,color:C.ink,bold:true,margin:0});
+  s.addShape(RR,{x:mx+4.06,y:my+1.72,w:1.78,h:0.34,rectRadius:0.06,fill:{color:"FFFFFF"},line:{color:C.border2,width:1}});
+  s.addText("🔥 자산동 노후빌라",{x:mx+4.06,y:my+1.72,w:1.78,h:0.34,align:"center",valign:"middle",fontFace:F,fontSize:9,color:C.ink,bold:true,margin:0});
   firePin(4.95,2.24);
   firePin(6.3,2.98); fireEmoji(6.3,2.98); firePin(3.4,2.62); fireEmoji(3.4,2.62);
   // 범례 (HTML 지도 표기와 동일)
@@ -385,20 +437,20 @@ function riskMap(s, x, y, w, h, opts={}){
 /* ═══ ⑭ 실제 시연 — 지도에 발화점 위치 지정 (자료 삽입용) ═══ */
 {
   const s=p.addSlide(); bg(s,C.dark);
-  headerDark(s,"실제 시연 · 마산어시장","지도에 발화점 위치 지정",C.violet);
+  headerDark(s,"실제 시연 · 자산동 노후 다세대","지도에 발화점 위치 지정",C.violet);
   // 이미지 삽입 자리 (실제 지도 캡처)
   const px=0.6,py=1.7,pw=7.95,ph=4.95;
   s.addShape(RR,{x:px,y:py,w:pw,h:ph,rectRadius:0.09,fill:{color:"0B1220"},line:{color:C.violet,width:1.5,dashType:"dash"}});
   s.addShape(OVAL,{x:px+pw/2-0.45,y:py+ph/2-0.85,w:0.9,h:0.9,fill:{color:"172033"},line:{color:C.violet,width:1.5}});
   s.addShape(OVAL,{x:px+pw/2-0.16,y:py+ph/2-0.56,w:0.32,h:0.32,fill:{color:C.orange},line:{color:"FBBF24",width:2}});
   s.addText("여기에 실제 시뮬레이터 지도 화면을 넣으세요",{x:px+0.5,y:py+ph/2+0.15,w:pw-1.0,h:0.4,align:"center",fontFace:F,fontSize:14,color:C.onDark,bold:true,margin:0});
-  s.addText("마산어시장 발화점 지정 · 마산소방서 거점 · 소방차 진입불가 빨간선 · 드론 직선 경로가 보이는 화면",
+  s.addText("자산동 노후 다세대 골목 발화점 지정 · 마산소방서 거점 · 소방차 진입불가 빨간선 · 드론 직선 경로가 보이는 화면",
     {x:px+0.7,y:py+ph/2+0.6,w:pw-1.4,h:0.6,align:"center",fontFace:F,fontSize:11,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.2});
   // 우: 출동 요약 (실측)
   const rx=8.75, rw=3.95;
   s.addShape(RR,{x:rx,y:1.7,w:rw,h:2.95,rectRadius:0.09,fill:{color:"172033"},line:{color:C.border2,width:1}});
   s.addText("출동 요약",{x:rx+0.3,y:1.9,w:rw-0.6,h:0.35,fontFace:F,fontSize:14,color:C.onDark,bold:true,margin:0});
-  const rows=[["현장","마산어시장","FB923C"],["최근접 거점","마산소방서 · 직선 1.33km","38BDF8"],["드론 도착","1분 00초","F97316"],["소방차","진입불가 골목 다수 · 호스 연장","FCA5A5"]];
+  const rows=[["현장","자산동 노후 다세대","FB923C"],["최근접 거점","마산소방서 · 직선 1.96km","38BDF8"],["드론 도착","1분 29초","F97316"],["소방차","진입불가 골목 다수 · 호스 연장","FCA5A5"]];
   let yy=2.36;
   rows.forEach(([k,v,col])=>{
     s.addText(k,{x:rx+0.3,y:yy,w:1.5,h:0.3,fontFace:F,fontSize:10.5,color:C.dim,margin:0});
@@ -409,14 +461,14 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addText("드론이 먼저 도착",{x:rx+0.3,y:5.0,w:rw-0.6,h:0.4,fontFace:F,fontSize:14,color:"4ADE80",bold:true,margin:0});
   s.addText("소방차가 못 가는 골목을 드론이 상공으로 넘어 1분 만에 화점 도착 — 초동 골든타임 확보.",
     {x:rx+0.3,y:5.42,w:rw-0.6,h:1.1,fontFace:F,fontSize:11.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.25,valign:"top"});
-  s.addNotes("발표 PC(인터넷 연결)에서 시뮬레이터를 열어 마산어시장 지정 → 지도 화면을 캡처해 이 자리(점선 박스)에 삽입.");
+  s.addNotes("발표 PC(인터넷 연결)에서 시뮬레이터를 열어 자산동 노후 다세대 골목 지점을 지정 → 지도 화면을 캡처해 이 자리(점선 박스)에 삽입.");
 }
 
 /* ═══ ⑮ 실제 시연 — 3D 건물 SOP-D 시뮬레이션 (실제 캡처) ═══ */
 {
   const s=p.addSlide(); bg(s,C.dark);
-  headerDark(s,"실제 시연 · 마산어시장","3D 건물 SOP-D 시뮬레이션",C.violet);
-  s.addImage({ path:"cap_3d_crop.png", x:0.75, y:1.5, w:11.83, h:5.24 });
+  headerDark(s,"실제 시연 · 자산동 노후 다세대","3D 건물 SOP-D 시뮬레이션",C.violet);
+  s.addImage({ path:"cap_jasan_crop.png", x:0.75, y:1.5, w:11.83, h:5.24 });
   s.addText("정찰(열화상 화점 탐지) · 진압(창문 파쇄·정밀 소화탄) · 인명수색구조(대피 인도) · 통신중계·조명 편대가 SOP-D 단계별로 동시에 자율 수행 — 실제 시뮬레이션 화면.",
     {x:0.75,y:6.82,w:11.83,h:0.5,fontFace:F,fontSize:11.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.1});
 }
