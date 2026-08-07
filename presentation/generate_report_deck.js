@@ -88,27 +88,27 @@ function riskMap(s, x, y, w, h, opts={}){
   const s=p.addSlide(); bg(s,C.dark);
   s.addText("문제 인식 · WHY",{x:0.6,y:0.5,w:11,h:0.32,fontFace:F,fontSize:12.5,color:C.red,bold:true,charSpacing:3,margin:0});
   s.addText("소방차가 닿지 못하는 곳에서, 사람이 죽는다",{x:0.6,y:0.82,w:12.1,h:0.7,fontFace:F,fontSize:28,color:C.onDark,bold:true,margin:0});
-  const cases=[
-    ["노후 주거 · 고령 인명 위험", C.orange, "마산합포구 자산동 노후 빌라 새벽 화재",
-      "2층서 발화 → 90대 여성 사망 · 50대 중상 · 주민 18명 대피.\n새벽·고령 단독 거주라 스스로 대피가 어려웠다."],
-    ["진입 지연 = 피해 급증", C.red, "좁은 골목·불법주차로 늦은 소방차",
-      "불법주차로 소방관이 현장 150m 밖부터 호스를 끌고 진입.\n제천 화재는 진입 30여 분 지연 → 29명 사망."],
-  ];
-  let x=0.6; const cw=6.0, gap=0.1, cy=1.75, ch=2.95;
-  cases.forEach(([tag,col,t,d])=>{
-    s.addShape(RR,{x,y:cy,w:cw,h:ch,rectRadius:0.1,fill:{color:"172033"},line:{color:col,width:1.3}});
-    chip(s,x+0.3,cy+0.3,2.5,tag,col,"0B1220");
-    s.addText(t,{x:x+0.3,y:cy+0.98,w:cw-0.6,h:0.5,fontFace:F,fontSize:16.5,color:C.onDark,bold:true,margin:0});
-    s.addText(d,{x:x+0.3,y:cy+1.55,w:cw-0.6,h:1.25,fontFace:F,fontSize:12.5,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.3,valign:"top"});
-    x+=cw+gap;
-  });
-  s.addShape(RR,{x:0.6,y:5.0,w:12.1,h:1.12,rectRadius:0.1,fill:{color:"1A0E06"},line:{color:C.amber,width:1.2}});
-  s.addText([{text:"골든타임을 놓치면 피해가 급증한다.  ",options:{color:"FBBF24",bold:true}},
-    {text:"현장도착 5분 초과 시 건당 재산피해 5,425 → 11,198천원, 10분 초과 시 사망률 약 2.5배.",options:{color:C.onDarkMute}}],
-    {x:0.9,y:5.0,w:11.5,h:1.12,valign:"middle",fontFace:F,fontSize:13.5,margin:0,lineSpacingMultiple:1.15});
-  s.addText("출처: 소방청 국가화재정보시스템(NFDS)·골든타임 연구 / 창원 마산합포 빌라 화재·진입지연 사례는 언론 보도.",
-    {x:0.6,y:6.26,w:12.1,h:0.3,fontFace:F,fontSize:9,color:C.dim,italic:true,margin:0});
-  s.addNotes("실제 사례로 문제 각인. 자산동 빌라=노후 주거·고령 인명 위험, 진입지연=별도 사례(제천 29명)로 구분해 설명.");
+  // 좌: 자산동 항공사진(스카이뷰) 삽입 자리
+  const px=0.6,py=1.7,pw=6.95,ph=3.8;
+  s.addShape(RR,{x:px,y:py,w:pw,h:ph,rectRadius:0.09,fill:{color:"0B1220"},line:{color:C.red,width:1.5,dashType:"dash"}});
+  s.addText("자산동 노후 다세대 밀집 항공사진 삽입",{x:px+0.5,y:py+ph/2-0.42,w:pw-1,h:0.4,align:"center",fontFace:F,fontSize:13,color:C.onDarkMute,bold:true,margin:0});
+  s.addText("카카오맵 스카이뷰로 자산동 일대를 캡처해 이 자리에 삽입",{x:px+0.7,y:py+ph/2+0.04,w:pw-1.4,h:0.4,align:"center",fontFace:F,fontSize:10.5,color:C.dim,margin:0});
+  s.addText("마산합포구 자산동 노후 다세대(빌라) 밀집지",{x:px,y:py+ph+0.06,w:pw,h:0.3,fontFace:F,fontSize:11.5,color:C.onDark,bold:true,margin:0});
+  s.addText("폭 4m 미만 골목 밀집 → 소방차 진입 곤란  ·  출처: 카카오맵 스카이뷰",{x:px,y:py+ph+0.36,w:pw,h:0.28,fontFace:F,fontSize:9.5,color:C.dim,margin:0});
+  // 우: 사례 + 통계
+  const rx=7.75, rw=4.95;
+  s.addShape(RR,{x:rx,y:1.7,w:rw,h:1.75,rectRadius:0.1,fill:{color:"172033"},line:{color:C.orange,width:1.3}});
+  chip(s,rx+0.26,1.88,2.7,"노후 주거·고령 인명 위험",C.orange,"0B1220");
+  s.addText("마산합포 자산동 노후 빌라 새벽 화재",{x:rx+0.28,y:2.46,w:rw-0.56,h:0.4,fontFace:F,fontSize:14,color:C.onDark,bold:true,margin:0});
+  s.addText("2층 발화 → 90대 사망 · 50대 중상 · 주민 18명 대피 (새벽·고령 단독 거주로 대피 지연)",{x:rx+0.28,y:2.86,w:rw-0.56,h:0.55,fontFace:F,fontSize:11,color:C.onDarkMute,margin:0,lineSpacingMultiple:1.22,valign:"top"});
+  s.addShape(RR,{x:rx,y:3.6,w:rw,h:0.95,rectRadius:0.1,fill:{color:"172033"},line:{color:C.red,width:1.2}});
+  s.addText([{text:"진입 지연 = 피해 급증  ",options:{color:C.red2,bold:true}},{text:"불법주차·좁은 골목으로 소방차 지연 — 제천 화재 진입 30분 지연 → 29명 사망.",options:{color:C.onDarkMute}}],
+    {x:rx+0.28,y:3.6,w:rw-0.56,h:0.95,valign:"middle",fontFace:F,fontSize:10.5,margin:0,lineSpacingMultiple:1.2});
+  s.addShape(RR,{x:rx,y:4.7,w:rw,h:0.85,rectRadius:0.1,fill:{color:"1A0E06"},line:{color:C.amber,width:1.2}});
+  s.addText([{text:"골든타임  ",options:{color:"FBBF24",bold:true}},{text:"현장도착 5분 초과 시 피해 2.1배 · 10분 초과 사망률 2.5배",options:{color:C.onDarkMute}}],
+    {x:rx+0.28,y:4.7,w:rw-0.56,h:0.85,valign:"middle",fontFace:F,fontSize:10.5,margin:0,lineSpacingMultiple:1.2});
+  s.addText("출처: 소방청 국가화재정보시스템(NFDS)·골든타임 연구 / 창원 마산합포 빌라 화재·진입지연 사례는 언론 보도.",{x:0.6,y:6.2,w:12.1,h:0.3,fontFace:F,fontSize:9,color:C.dim,italic:true,margin:0});
+  s.addNotes("좌측 자산동 항공사진(스카이뷰)으로 '노후 다세대 밀집·진입 곤란'을 각인. 우측: 실제 사례(자산동 90대 사망)+진입지연(제천 29명)+골든타임 통계. 사진은 프레임에 스카이뷰 캡처를 삽입.");
 }
 
 /* ═══ 도입② 문제 인식 · 세 개의 벽 (라이트) ═══ */
@@ -198,31 +198,10 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addText("경남 전체 화재의 15.8% 집중 — 화재 최다 도시를 드론 배치 대상 지역으로 확정",{x:9.2,y:4.68,w:3.3,h:1.5,fontFace:F,fontSize:12.5,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.3});
 }
 
-/* ═══ ⑤ STEP 03 창원 구별 화재와 피해 ═══ */
+/* ═══ ⑤ STEP 03 지도 — 소방차 진입불가 지역 ═══ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 03","분석 ① — 창원 구별 화재와 피해",C.orange);
-  s.addText("소방안전 빅데이터 플랫폼 · 최근 1년 · 창원시 구별 화재 발생 건수",{x:0.6,y:1.5,w:11,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
-  s.addChart(p.ChartType.bar, [{name:"화재건수", labels:["의창구","진해구","마산합포구","성산구","마산회원구"], values:[126,117,116,116,88]}],
-    {x:0.6,y:1.95,w:7.6,h:4.35, barDir:"col", chartColors:[C.orange],
-     showValue:true, dataLabelPosition:"outEnd", dataLabelColor:C.ink, dataLabelFontFace:FM, dataLabelFontSize:12, dataLabelFontBold:true,
-     showLegend:false, showTitle:false, catAxisLabelColor:C.body, catAxisLabelFontFace:F, catAxisLabelFontSize:11, catGridLine:{style:"none"}, catAxisLineColor:C.border2,
-     valAxisHidden:true, valGridLine:{style:"none"}, valAxisMaxVal:145, barGapWidthPct:55});
-  card(s,8.55,1.95,4.15,4.35,C.panel2,C.border);
-  s.addText("읽는 법",{x:8.85,y:2.2,w:3.6,h:0.35,fontFace:F,fontSize:14,color:C.orange,bold:true,margin:0});
-  ["구별 화재건수는\n88~126건으로 비슷","차이는 도로·노후·\n인명피해에서 갈린다","마산합포구는\n인명피해가 창원 최다"].forEach((t,i)=>{
-    dot(s,8.9,2.72+i*0.62,0.15,C.orange);
-    s.addText(t,{x:9.2,y:2.5+i*0.62,w:3.3,h:0.62,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"middle",lineSpacingMultiple:1.1});
-  });
-  flatCard(s,8.85,4.75,3.6,1.3,C.redL,"FCA5A5");
-  s.addText("마산합포구",{x:9.1,y:4.9,w:3.1,h:0.35,fontFace:F,fontSize:12,color:C.red,bold:true,margin:0});
-  s.addText("인명피해 22명(사망 5) — 원도심 위험 집중",{x:9.1,y:5.25,w:3.2,h:0.8,fontFace:F,fontSize:12,color:C.ink,margin:0,valign:"top",lineSpacingMultiple:1.15});
-}
-
-/* ═══ ⑥ STEP 04 지도 — 소방차 진입불가 지역 ═══ */
-{
-  const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 04","지도에서 소방차 진입불가 지역을 찾는다",C.orange);
+  header(s,"PART 1 · STEP 03","지도에서 소방차 진입불가 지역을 찾는다",C.orange);
   const px=0.6,py=1.8,pw=7.7,ph=4.55;
   card(s,px,py,pw,ph,C.card,C.border);
   const mx=px+0.25,my=py+0.25,mw=pw-0.5,mh=ph-0.85;
@@ -276,8 +255,8 @@ function riskMap(s, x, y, w, h, opts={}){
 /* ═══ ⑦ STEP 05 종합 위험 지수 ═══ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 05","분석 ② — 종합 위험 지수로 합친다",C.orange);
-  s.addText("화재빈도(실측 반영) · 도로협소 · 노후건물 · 고령인구 가중 합산 (도로·노후·고령은 예시)",{x:0.6,y:1.5,w:11.5,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
+  header(s,"PART 1 · STEP 04","종합 위험 지수 — 피해지역 · 고령 · 진입취약",C.orange);
+  s.addText("화재 발생(실측 반영) · 도로협소 · 노후건물 · 고령인구를 가중 합산 (도로·노후·고령은 예시)",{x:0.6,y:1.5,w:11.5,h:0.35,fontFace:F,fontSize:12.5,color:C.mute,margin:0});
   s.addChart(p.ChartType.bar, [
     {name:"화재빈도", labels:["마산합포구","진해구","의창구","성산구"], values:[30,29,33,30]},
     {name:"도로협소", labels:["마산합포구","진해구","의창구","성산구"], values:[31,28,14,13]},
@@ -293,13 +272,13 @@ function riskMap(s, x, y, w, h, opts={}){
   s.addText("104",{x:9.4,y:3.15,w:2.2,h:0.8,fontFace:FM,fontSize:44,color:C.ink,bold:true,margin:0});
   s.addText("점 / 위험지수",{x:9.4,y:3.98,w:3.1,h:0.3,fontFace:F,fontSize:11,color:C.mute,margin:0});
   s.addShape(LINE,{x:9.4,y:4.4,w:3.0,h:0,line:{color:C.border,width:1}});
-  s.addText("의창구는 화재건수 최다지만 도로·노후가 낮아 종합은 하위 — 원도심(마산합포·진해)이 상위",{x:9.4,y:4.5,w:3.1,h:1.5,fontFace:F,fontSize:12,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.25});
+  s.addText("의창구는 화재건수 최다지만 도로·노후가 낮아 종합은 하위. 마산합포구는 인명피해 최다(사망 5) — 원도심이 상위",{x:9.4,y:4.5,w:3.1,h:1.55,fontFace:F,fontSize:11.5,color:C.body,margin:0,valign:"top",lineSpacingMultiple:1.22});
 }
 
 /* ═══ ⑧ STEP 06 거점 소방서 선정 ═══ */
 {
   const s=p.addSlide(); bg(s);
-  header(s,"PART 1 · STEP 06","창원 안에서 거점 소방서를 정한다",C.red);
+  header(s,"PART 1 · STEP 05","창원 안에서 거점 소방서를 정한다",C.red);
   card(s,0.6,1.75,7.1,4.6);
   riskMap(s,0.85,2.0,6.6,3.85,{stations:[{r:3.4,c:2.6,name:"마산소방서",sel:true},{r:5.6,c:6.4,name:"성산소방서"},{r:2.0,c:8.6,name:"창원소방서"}]});
   s.addText("붉을수록 위험 지수 높음 · ★ 선정 거점",{x:0.85,y:5.9,w:6.6,h:0.3,align:"center",fontFace:F,fontSize:10,color:C.mute,margin:0});
