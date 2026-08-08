@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_d304e3c98314d21d937f682324e55352 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_d304e3c98314d21d937f682324e55352" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_d304e3c98314d21d937f682324e55352 = L.map(
+                "map_d304e3c98314d21d937f682324e55352",
+                {
+                    center: [35.215, 128.625],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 12,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_6982990ca72621b1863c8c2017742ccf = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 18,
+  "maxNativeZoom": 18,
+  "noWrap": false,
+  "attribution": "CartoDB",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_6982990ca72621b1863c8c2017742ccf.addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var circle_a8d7f71f7af91c088c10cdd31d97a13a = L.circle(
+                [35.2536, 128.6015],
+                {"bubblingMouseEvents": true, "color": "#0288D1", "dashArray": "6, 6", "dashOffset": null, "fill": true, "fillColor": "#0288D1", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3000, "stroke": true, "weight": 1.5}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_bd1467cf9210a715467eeebd82847639 = L.marker(
+                [35.2536, 128.6015],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_08890721a765503c5e2743f953b32edb = L.divIcon({
+  "html": "\n    \u003cdiv style=\"background: #F0F9FF; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #0288D1; box-shadow: 0 4px 10px rgba(2, 136, 209, 0.35);\"\u003e\n        \u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"26\" height=\"26\"\u003e\n  \u003ccircle cx=\"50\" cy=\"50\" r=\"10\" fill=\"#0288D1\"/\u003e\n  \u003cpath d=\"M 50 50 L 25 25 M 50 50 L 75 25 M 50 50 L 25 75 M 50 50 L 75 75\" stroke=\"#0288D1\" stroke-width=\"8\" stroke-linecap=\"round\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"14\" x2=\"30\" y2=\"30\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"30\" x2=\"86\" y2=\"14\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"86\" x2=\"30\" y2=\"70\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"70\" x2=\"86\" y2=\"86\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n\u003c/svg\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [38, 38],
+  "iconAnchor": [19, 19],
+  "className": "empty",
+});
+        
+    
+            marker_bd1467cf9210a715467eeebd82847639.bindTooltip(
+                `<div>
+                     🚁 창원소방서 (의창 거점)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_bd1467cf9210a715467eeebd82847639.setIcon(div_icon_08890721a765503c5e2743f953b32edb);
+            
+    
+            var circle_e7a9a9f1984bab285554bd00156e3594 = L.circle(
+                [35.211, 128.6912],
+                {"bubblingMouseEvents": true, "color": "#0288D1", "dashArray": "6, 6", "dashOffset": null, "fill": true, "fillColor": "#0288D1", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3000, "stroke": true, "weight": 1.5}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_69fcf7f77c11944f6dc57a018bd78fc9 = L.marker(
+                [35.211, 128.6912],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_3849161d69a9c23c820fb72d421cb848 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"background: #F0F9FF; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #0288D1; box-shadow: 0 4px 10px rgba(2, 136, 209, 0.35);\"\u003e\n        \u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"26\" height=\"26\"\u003e\n  \u003ccircle cx=\"50\" cy=\"50\" r=\"10\" fill=\"#0288D1\"/\u003e\n  \u003cpath d=\"M 50 50 L 25 25 M 50 50 L 75 25 M 50 50 L 25 75 M 50 50 L 75 75\" stroke=\"#0288D1\" stroke-width=\"8\" stroke-linecap=\"round\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"14\" x2=\"30\" y2=\"30\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"30\" x2=\"86\" y2=\"14\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"86\" x2=\"30\" y2=\"70\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"70\" x2=\"86\" y2=\"86\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n\u003c/svg\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [38, 38],
+  "iconAnchor": [19, 19],
+  "className": "empty",
+});
+        
+    
+            marker_69fcf7f77c11944f6dc57a018bd78fc9.bindTooltip(
+                `<div>
+                     🚁 성산소방서 (성산 거점)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_69fcf7f77c11944f6dc57a018bd78fc9.setIcon(div_icon_3849161d69a9c23c820fb72d421cb848);
+            
+    
+            var circle_eb2579547ea82561d7c365c29a787f21 = L.circle(
+                [35.2104, 128.5721],
+                {"bubblingMouseEvents": true, "color": "#0288D1", "dashArray": "6, 6", "dashOffset": null, "fill": true, "fillColor": "#0288D1", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3000, "stroke": true, "weight": 1.5}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_01184613f0dd68c7a95575ca8aae7a3b = L.marker(
+                [35.2104, 128.5721],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_f2dd877005c292b3d4a578eb3890e4b5 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"background: #F0F9FF; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #0288D1; box-shadow: 0 4px 10px rgba(2, 136, 209, 0.35);\"\u003e\n        \u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"26\" height=\"26\"\u003e\n  \u003ccircle cx=\"50\" cy=\"50\" r=\"10\" fill=\"#0288D1\"/\u003e\n  \u003cpath d=\"M 50 50 L 25 25 M 50 50 L 75 25 M 50 50 L 25 75 M 50 50 L 75 75\" stroke=\"#0288D1\" stroke-width=\"8\" stroke-linecap=\"round\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"14\" x2=\"30\" y2=\"30\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"30\" x2=\"86\" y2=\"14\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"86\" x2=\"30\" y2=\"70\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"70\" x2=\"86\" y2=\"86\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n\u003c/svg\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [38, 38],
+  "iconAnchor": [19, 19],
+  "className": "empty",
+});
+        
+    
+            marker_01184613f0dd68c7a95575ca8aae7a3b.bindTooltip(
+                `<div>
+                     🚁 마산소방서 (합포/회원 거점)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_01184613f0dd68c7a95575ca8aae7a3b.setIcon(div_icon_f2dd877005c292b3d4a578eb3890e4b5);
+            
+    
+            var circle_d9789cb71ca57db3af0e9e29370926d4 = L.circle(
+                [35.1523, 128.683],
+                {"bubblingMouseEvents": true, "color": "#0288D1", "dashArray": "6, 6", "dashOffset": null, "fill": true, "fillColor": "#0288D1", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3000, "stroke": true, "weight": 1.5}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_bf9094f3a03e39a67bcdc549239a496e = L.marker(
+                [35.1523, 128.683],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_7b8e1417d0446100cda4d25e37c18641 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"background: #F0F9FF; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #0288D1; box-shadow: 0 4px 10px rgba(2, 136, 209, 0.35);\"\u003e\n        \u003csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\" width=\"26\" height=\"26\"\u003e\n  \u003ccircle cx=\"50\" cy=\"50\" r=\"10\" fill=\"#0288D1\"/\u003e\n  \u003cpath d=\"M 50 50 L 25 25 M 50 50 L 75 25 M 50 50 L 25 75 M 50 50 L 75 75\" stroke=\"#0288D1\" stroke-width=\"8\" stroke-linecap=\"round\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"14\" x2=\"30\" y2=\"30\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"22\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"30\" x2=\"86\" y2=\"14\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"22\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"14\" y1=\"86\" x2=\"30\" y2=\"70\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"13\" fill=\"none\" stroke=\"#0288D1\" stroke-width=\"5\"/\u003e\n  \u003ccircle cx=\"78\" cy=\"78\" r=\"4\" fill=\"#0288D1\"/\u003e\n  \u003cline x1=\"70\" y1=\"70\" x2=\"86\" y2=\"86\" stroke=\"#0288D1\" stroke-width=\"4\"/\u003e\n\u003c/svg\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [38, 38],
+  "iconAnchor": [19, 19],
+  "className": "empty",
+});
+        
+    
+            marker_bf9094f3a03e39a67bcdc549239a496e.bindTooltip(
+                `<div>
+                     🚁 진해소방서 (진해 거점)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_bf9094f3a03e39a67bcdc549239a496e.setIcon(div_icon_7b8e1417d0446100cda4d25e37c18641);
+            
+    
+            var circle_22271e7b477d103bccd984ef956ae1a6 = L.circle(
+                [35.257, 128.6253],
+                {"bubblingMouseEvents": true, "color": "#D32F2F", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF5252", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 2000, "stroke": true, "weight": 1}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_327a4d78e58d4735e494a25764bbf841 = L.marker(
+                [35.263999999999996, 128.61030000000002],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_5d79645d541c295803c2557b07171ebb = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #0F172A; color: #FFFFFF; border: 1px solid #334155; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;\"\u003e\n        \u003cspan style=\"color: #FF5252;\"\u003e\ud83d\udd25 \uc758\ucc3d\uad6c\u003c/span\u003e\n        \u003cspan style=\"background: #E11D48; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;\"\u003e126\uac74\u003c/span\u003e\n    \u003c/div\u003e\n    ",
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_327a4d78e58d4735e494a25764bbf841.setIcon(div_icon_5d79645d541c295803c2557b07171ebb);
+            
+    
+            var circle_7a4f6355b6e42bb9f89d8fa61743aefb = L.circle(
+                [35.2158, 128.698],
+                {"bubblingMouseEvents": true, "color": "#D32F2F", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF5252", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 2000, "stroke": true, "weight": 1}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_124c16b17ef4fff226ba525a6392252a = L.marker(
+                [35.2228, 128.68300000000002],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_953aae3c7df882524d4ecfd27657bc51 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #0F172A; color: #FFFFFF; border: 1px solid #334155; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;\"\u003e\n        \u003cspan style=\"color: #FF5252;\"\u003e\ud83d\udd25 \uc131\uc0b0\uad6c\u003c/span\u003e\n        \u003cspan style=\"background: #E11D48; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;\"\u003e116\uac74\u003c/span\u003e\n    \u003c/div\u003e\n    ",
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_124c16b17ef4fff226ba525a6392252a.setIcon(div_icon_953aae3c7df882524d4ecfd27657bc51);
+            
+    
+            var circle_377cd8774eef6833146ef941a7f73183 = L.circle(
+                [35.1872, 128.5606],
+                {"bubblingMouseEvents": true, "color": "#D32F2F", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF5252", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 2000, "stroke": true, "weight": 1}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_8adebcf089e94f5db6b73b1e5f0f7119 = L.marker(
+                [35.194199999999995, 128.5456],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_21f1bf6afa8a8dfbfc1f37bad99a4b2c = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #0F172A; color: #FFFFFF; border: 1px solid #334155; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;\"\u003e\n        \u003cspan style=\"color: #FF5252;\"\u003e\ud83d\udd25 \ub9c8\uc0b0\ud569\ud3ec\uad6c\u003c/span\u003e\n        \u003cspan style=\"background: #E11D48; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;\"\u003e116\uac74\u003c/span\u003e\n    \u003c/div\u003e\n    ",
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_8adebcf089e94f5db6b73b1e5f0f7119.setIcon(div_icon_21f1bf6afa8a8dfbfc1f37bad99a4b2c);
+            
+    
+            var circle_35d4e8fa82745feeb26b636e4cb47722 = L.circle(
+                [35.2343, 128.5833],
+                {"bubblingMouseEvents": true, "color": "#D32F2F", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF5252", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 2000, "stroke": true, "weight": 1}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_ad2dc2dfaa8f8316aa8da1f9dc13b32b = L.marker(
+                [35.241299999999995, 128.56830000000002],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_8b37806aa9399ff4335d5a9db3dfc43b = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #0F172A; color: #FFFFFF; border: 1px solid #334155; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;\"\u003e\n        \u003cspan style=\"color: #FF5252;\"\u003e\ud83d\udd25 \ub9c8\uc0b0\ud68c\uc6d0\uad6c\u003c/span\u003e\n        \u003cspan style=\"background: #E11D48; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;\"\u003e88\uac74\u003c/span\u003e\n    \u003c/div\u003e\n    ",
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_ad2dc2dfaa8f8316aa8da1f9dc13b32b.setIcon(div_icon_8b37806aa9399ff4335d5a9db3dfc43b);
+            
+    
+            var circle_53cd9026500cce577d97864d2ef36c99 = L.circle(
+                [35.1485, 128.6806],
+                {"bubblingMouseEvents": true, "color": "#D32F2F", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF5252", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 2000, "stroke": true, "weight": 1}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var marker_47ce17c49f4b1c522e057d7480def4f8 = L.marker(
+                [35.155499999999996, 128.6656],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_6cb07748dbce969c90dbd5304ad1cd13 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #0F172A; color: #FFFFFF; border: 1px solid #334155; border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;\"\u003e\n        \u003cspan style=\"color: #FF5252;\"\u003e\ud83d\udd25 \uc9c4\ud574\uad6c\u003c/span\u003e\n        \u003cspan style=\"background: #E11D48; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px;\"\u003e117\uac74\u003c/span\u003e\n    \u003c/div\u003e\n    ",
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_47ce17c49f4b1c522e057d7480def4f8.setIcon(div_icon_6cb07748dbce969c90dbd5304ad1cd13);
+            
+    
+            var poly_line_a6cdf560ebc5096b79cc52e42d383606 = L.polyline(
+                [[35.201078, 128.650024], [35.201184, 128.650809], [35.201355, 128.651007], [35.201618, 128.651045], [35.201886, 128.651168], [35.202513, 128.651061], [35.202688, 128.651458], [35.20299, 128.651909], [35.203192, 128.651903], [35.203343, 128.652016], [35.203322, 128.652062], [35.203388, 128.652191], [35.203533, 128.652244], [35.203791, 128.652234], [35.204335, 128.652454], [35.205374, 128.652958], [35.205148, 128.653417], [35.205088, 128.653698], [35.205059, 128.653815], [35.205035, 128.65391], [35.204975, 128.654153], [35.205365, 128.65446], [35.205486, 128.654559], [35.205842, 128.65485], [35.206271, 128.655209], [35.206658, 128.655552], [35.207546, 128.656321], [35.208445, 128.657073], [35.208744, 128.657324], [35.209033, 128.657449], [35.209693, 128.658019], [35.209781, 128.658096], [35.209706, 128.658231], [35.208047, 128.66119], [35.207678, 128.661849], [35.207153, 128.662785], [35.207098, 128.662884], [35.207015, 128.663028], [35.205149, 128.666284], [35.202816, 128.670354], [35.202671, 128.670434], [35.202572, 128.670478], [35.202491, 128.670513], [35.202398, 128.670524], [35.202274, 128.67052], [35.199278, 128.668013], [35.198389, 128.667289], [35.197954, 128.666853], [35.197865, 128.666681], [35.197724, 128.666394], [35.197716, 128.666353], [35.197699, 128.666316], [35.197674, 128.666286], [35.197645, 128.666265], [35.197611, 128.666254], [35.197708, 128.665825], [35.197809, 128.665493], [35.198326, 128.664368], [35.198684, 128.663496], [35.198947, 128.662787], [35.198927, 128.662305], [35.198776, 128.661957], [35.198592, 128.661754], [35.198024, 128.661589], [35.197289, 128.661478], [35.196644, 128.661614], [35.196029, 128.661851]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_a6cdf560ebc5096b79cc52e42d383606.bindTooltip(
+                `<div>
+                     🚫 웅남/신촌 공단내 공단로
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_234438378f4840932de1673476679f66 = L.marker(
+                [35.208047, 128.66119],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_9f35415da28a66ece83be0d2ad99016d = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uc6c5\ub0a8/\uc2e0\ucd0c \uacf5\ub2e8\ub0b4 \uacf5\ub2e8\ub85c\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uacf5\ub2e8 \ub0b4 \ud654\ubb3c\ucc28 \ubc24\uc0d8\uc8fc\ucc28 \ubc0f \uc790\uc7ac \uc801\uce58)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_234438378f4840932de1673476679f66.setIcon(div_icon_9f35415da28a66ece83be0d2ad99016d);
+            
+    
+            var poly_line_323e1c72d88224d4b0188b6d5cccbc16 = L.polyline(
+                [[35.253103, 128.646822], [35.253072, 128.646615], [35.252648, 128.646956], [35.252106, 128.647395], [35.251955, 128.647517], [35.251354, 128.648026], [35.251227, 128.648072], [35.250995, 128.648277], [35.250884, 128.648352], [35.250371, 128.648548], [35.250335, 128.648562], [35.249412, 128.648923], [35.249379, 128.64893], [35.249498, 128.649428], [35.249613, 128.649887], [35.249726, 128.65036], [35.249833, 128.6508], [35.249803, 128.650811]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_323e1c72d88224d4b0188b6d5cccbc16.bindTooltip(
+                `<div>
+                     🚫 명서동 주거밀집 이면도로
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_53692e4bde27adebdce895a5dde6dd70 = L.marker(
+                [35.250371, 128.648548],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_f3022c285ee84efa058ba602eee14bb5 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uba85\uc11c\ub3d9 \uc8fc\uac70\ubc00\uc9d1 \uc774\uba74\ub3c4\ub85c\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\ub3c4\ub85c\ud3ed 2.5m \ubbf8\ub9cc \ucd08\ud611\uc18c \u0026 \uc591\uae38 \uc8fc\ucc28)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_53692e4bde27adebdce895a5dde6dd70.setIcon(div_icon_f3022c285ee84efa058ba602eee14bb5);
+            
+    
+            var poly_line_80b5f0cd4a3fe4b9035f343aab201405 = L.polyline(
+                [[35.244118, 128.65303], [35.244304, 128.652706], [35.243969, 128.652418], [35.243164, 128.651751], [35.242376, 128.651087], [35.242286, 128.651079], [35.242296, 128.650951], [35.24237, 128.650481], [35.242069, 128.651042], [35.24199, 128.651174], [35.241883, 128.651375], [35.241761, 128.651614], [35.241672, 128.651834], [35.241649, 128.651885], [35.241563, 128.652082], [35.241354, 128.652597], [35.241325, 128.652667], [35.241247, 128.652858], [35.240237, 128.65533], [35.240422, 128.65544], [35.240604, 128.655548], [35.240632, 128.655563], [35.240972, 128.655777], [35.241327, 128.655981], [35.24096, 128.656896]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_80b5f0cd4a3fe4b9035f343aab201405.bindTooltip(
+                `<div>
+                     🚫 봉곡동 상가/주택 이면도로
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7b686ff40207636c272d33081166becd = L.marker(
+                [35.241672, 128.651834],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_8b18a8c45a4590471332819e551a1bbf = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\ubd09\uace1\ub3d9 \uc0c1\uac00/\uc8fc\ud0dd \uc774\uba74\ub3c4\ub85c\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uc0c1\uac00 \ubc29\ubb38\ucc28\ub7c9 \ubd88\ubc95\uc8fc\ucc28\ub85c \ud1b5\ud589 \ucc28\ub2e8)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_7b686ff40207636c272d33081166becd.setIcon(div_icon_8b18a8c45a4590471332819e551a1bbf);
+            
+    
+            var poly_line_78de8b250efebbe11fb3261adda249e9 = L.polyline(
+                [[35.224237, 128.682479], [35.223786, 128.682107], [35.223431, 128.682705], [35.222303, 128.681748], [35.222038, 128.682199], [35.221628, 128.682897], [35.221228, 128.68358], [35.220635, 128.684616]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_78de8b250efebbe11fb3261adda249e9.bindTooltip(
+                `<div>
+                     🚫 상남동 상업지구 이면도로
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_03d40919f93070e708bc3b0e6cd2df67 = L.marker(
+                [35.222038, 128.682199],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_56c810dc6ac3c8a1315f8c53f9c13c56 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uc0c1\ub0a8\ub3d9 \uc0c1\uc5c5\uc9c0\uad6c \uc774\uba74\ub3c4\ub85c\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uc57c\uac04 \uc8fc\ucc28 \uadf9\uc2ec, \uad74\uc808\uc0ac\ub2e4\ub9ac\ucc28 \ud68c\uc804\uac01 \ubd80\uc871)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_03d40919f93070e708bc3b0e6cd2df67.setIcon(div_icon_56c810dc6ac3c8a1315f8c53f9c13c56);
+            
+    
+            var poly_line_0359666596c0ab718ce7c67d1c405b53 = L.polyline(
+                [[35.205777, 128.573716], [35.205552, 128.573808], [35.205679, 128.574139], [35.204851, 128.57454], [35.204362, 128.574622], [35.204372, 128.575023], [35.204373, 128.57542], [35.204376, 128.575769], [35.204355, 128.576274], [35.204272, 128.576757], [35.204359, 128.576883], [35.204057, 128.576977], [35.203871, 128.576965], [35.203771, 128.576959], [35.203728, 128.576956], [35.203465, 128.577211], [35.203085, 128.577579], [35.203018, 128.577481]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_0359666596c0ab718ce7c67d1c405b53.bindTooltip(
+                `<div>
+                     🚫 마산어시장 & 오동동 전통시장
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_00fa5f075eac605f2f49a87a4a56c571 = L.marker(
+                [35.204272, 128.576757],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_80da1770362e8eceacc0e7d720d891df = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\ub9c8\uc0b0\uc5b4\uc2dc\uc7a5 \u0026 \uc624\ub3d9\ub3d9 \uc804\ud1b5\uc2dc\uc7a5\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uc544\ucf00\uc774\ub4dc \uad6c\uc870 \ubc0f \uace0\uc815 \ub178\uc810\uc0c1\uc73c\ub85c \ucc28\ub85c \uc804\ubb34)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_00fa5f075eac605f2f49a87a4a56c571.setIcon(div_icon_80da1770362e8eceacc0e7d720d891df);
+            
+    
+            var poly_line_f9ed71d5b0d5f85923c8c186699ee841 = L.polyline(
+                [[35.194447, 128.562956], [35.194398, 128.563044], [35.19424, 128.563175], [35.193862, 128.562775], [35.193549, 128.562392], [35.193443, 128.562262], [35.192976, 128.561817], [35.192283, 128.562898], [35.192086, 128.563245], [35.191863, 128.563606], [35.1916, 128.564047], [35.19124, 128.564568], [35.190869, 128.564954], [35.190308, 128.565526], [35.190144, 128.565758], [35.190707, 128.566256], [35.190999, 128.566526]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_f9ed71d5b0d5f85923c8c186699ee841.bindTooltip(
+                `<div>
+                     🚫 자산/완월동 고지대 골목길
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_38b79b22a6d495b2367250d2004346c2 = L.marker(
+                [35.192086, 128.563245],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_4d26ec0ad3d2e8aab56dabf81b466c4d = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uc790\uc0b0/\uc644\uc6d4\ub3d9 \uace0\uc9c0\ub300 \uace8\ubaa9\uae38\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uacbd\uc0ac\ub3c4 15\ub3c4 \uc774\uc0c1 \uae09\uacbd\uc0ac \u0026 \uacc4\ub2e8\uc2dd \ub3c4\ub85c \uad6c\uc870)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_38b79b22a6d495b2367250d2004346c2.setIcon(div_icon_4d26ec0ad3d2e8aab56dabf81b466c4d);
+            
+    
+            var poly_line_200e753268a4be1004999bf782b81312 = L.polyline(
+                [[35.239559, 128.580854], [35.239193, 128.580633], [35.238686, 128.581611], [35.238317, 128.582376], [35.237439, 128.581702], [35.236585, 128.581041], [35.236526, 128.580992], [35.236365, 128.580881], [35.236342, 128.580868], [35.236229, 128.580926], [35.236249, 128.580941], [35.236436, 128.581081], [35.237547, 128.581936], [35.237121, 128.582772], [35.236657, 128.583642], [35.236326, 128.584222]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_200e753268a4be1004999bf782b81312.bindTooltip(
+                `<div>
+                     🚫 합성동 상가주택 골목
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4478dde9bd18eb1d0539340b0e8f49b6 = L.marker(
+                [35.236342, 128.580868],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_6ecca61d0830fd5a14f60ae78429a59a = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\ud569\uc131\ub3d9 \uc0c1\uac00\uc8fc\ud0dd \uace8\ubaa9\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uc881\uc740 \uc774\uba74\ub3c4\ub85c \u0026 \ub3cc\ucd9c\uac04\ud310 \uc7a5\uc560\ubb3c)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_4478dde9bd18eb1d0539340b0e8f49b6.setIcon(div_icon_6ecca61d0830fd5a14f60ae78429a59a);
+            
+    
+            var poly_line_cc44e5252fe21e5a2cdfb44f9d22dbe4 = L.polyline(
+                [[35.244491, 128.598549], [35.244472, 128.598549], [35.244054, 128.598537], [35.244016, 128.598544], [35.243989, 128.598561], [35.243967, 128.598595], [35.243955, 128.59863], [35.243953, 128.598671], [35.243949, 128.599093], [35.243947, 128.599287], [35.243941, 128.600031], [35.24344, 128.600026], [35.243209, 128.600024], [35.243104, 128.600025], [35.243097, 128.600071], [35.24308, 128.600113], [35.243064, 128.600153], [35.243056, 128.600208], [35.243052, 128.60054]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_cc44e5252fe21e5a2cdfb44f9d22dbe4.bindTooltip(
+                `<div>
+                     🚫 구암동 노후주택가 골목
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_22549c50828033371d235177da50b581 = L.marker(
+                [35.243947, 128.599287],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_1d10ceef380e063ff47f6e9835248e4f = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uad6c\uc554\ub3d9 \ub178\ud6c4\uc8fc\ud0dd\uac00 \uace8\ubaa9\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\ub3c4\ub85c\ud3ed 3m \ubbf8\ub9cc \ub9c9\ub2e4\ub978 \uace8\ubaa9\uae38 \uad6c\uc870)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_22549c50828033371d235177da50b581.setIcon(div_icon_1d10ceef380e063ff47f6e9835248e4f);
+            
+    
+            var poly_line_45073b75b49be10802b3ecbbd4c8e446 = L.polyline(
+                [[35.14946, 128.658996], [35.149442, 128.659278], [35.149418, 128.659274], [35.149394, 128.659271], [35.14937, 128.659271], [35.149346, 128.659273], [35.149322, 128.659278], [35.149299, 128.659284], [35.149276, 128.659292], [35.149253, 128.659303], [35.149231, 128.659315], [35.14921, 128.659329], [35.14919, 128.659346], [35.149175, 128.659359], [35.149161, 128.659373], [35.149148, 128.659388], [35.149135, 128.659404], [35.149124, 128.659421], [35.149113, 128.659438], [35.149102, 128.659456], [35.149093, 128.659475], [35.149084, 128.659495], [35.149076, 128.659515], [35.14907, 128.659535], [35.149064, 128.659556], [35.149059, 128.659577], [35.149055, 128.659599], [35.149052, 128.659621], [35.149049, 128.659643], [35.149048, 128.659665], [35.149048, 128.659686], [35.149049, 128.659708], [35.149051, 128.659729], [35.149053, 128.65975], [35.149057, 128.659771], [35.149061, 128.659792], [35.149066, 128.659812], [35.149072, 128.659833], [35.149079, 128.659852], [35.149087, 128.659871], [35.149096, 128.65989], [35.149105, 128.659908], [35.149116, 128.659926], [35.148499, 128.660502], [35.148371, 128.660621], [35.148008, 128.660961], [35.147749, 128.661203], [35.146639, 128.66224], [35.146456, 128.662412], [35.146441, 128.662426]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_45073b75b49be10802b3ecbbd4c8e446.bindTooltip(
+                `<div>
+                     🚫 진해 중앙동 구도심 골목
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f94fb2a707a931318ac35458f38cf4a9 = L.marker(
+                [35.149059, 128.659577],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_d75107659235b41b029a0b19820b4b8e = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uc9c4\ud574 \uc911\uc559\ub3d9 \uad6c\ub3c4\uc2ec \uace8\ubaa9\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\uc77c\uc81c\uac15\uc810\uae30 \ud615\uc131\uacfc \uad74\uace1\uc9c4 \ucd08\ud611\uc18c \ub3c4\ub85c)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_f94fb2a707a931318ac35458f38cf4a9.setIcon(div_icon_d75107659235b41b029a0b19820b4b8e);
+            
+    
+            var poly_line_878e74ba87de1568b18c827f7829b9d6 = L.polyline(
+                [[35.14459, 128.691243], [35.144393, 128.691353], [35.143504, 128.691736], [35.143043, 128.691875], [35.142144, 128.692147], [35.14206, 128.692156], [35.141885, 128.692021], [35.141682, 128.691993], [35.141514, 128.692044]],
+                {"bubblingMouseEvents": true, "color": "#DC2626", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#DC2626", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 8}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            poly_line_878e74ba87de1568b18c827f7829b9d6.bindTooltip(
+                `<div>
+                     🚫 진해 이동/자은동 주거지
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_530300858b48fe19b70df4e40a225a1c = L.marker(
+                [35.142144, 128.692147],
+                {
+}
+            ).addTo(map_d304e3c98314d21d937f682324e55352);
+        
+    
+            var div_icon_df7eaabdcd4268ec4a690f4e37978781 = L.divIcon({
+  "html": "\n    \u003cdiv style=\"font-family: sans-serif; background: #FFFFFF; color: #1E293B; border: 1.5px solid #DC2626; border-radius: 8px; padding: 5px 9px; box-shadow: 0 3px 8px rgba(0,0,0,0.18); display: inline-block; white-space: nowrap; transform: translate(-50%, -135%);\"\u003e\n        \u003cdiv style=\"display: flex; align-items: center; gap: 4px; margin-bottom: 2px;\"\u003e\n            \u003cspan style=\"font-size: 13px;\"\u003e\u26a0\ufe0f\u003c/span\u003e\n            \u003cspan style=\"font-size: 11px; font-weight: bold; color: #DC2626;\"\u003e\uc9c4\ud574 \uc774\ub3d9/\uc790\uc740\ub3d9 \uc8fc\uac70\uc9c0\u003c/span\u003e\n        \u003c/div\u003e\n        \u003cdiv style=\"font-size: 10px; color: #475569; font-weight: bold;\"\u003e(\ub178\ud6c4\uc8fc\ud0dd\uac00 \uc591\uae38 \uc8fc\ucc28\ub85c \uc18c\ubc29\ucc28 \ud68c\uc804 \ubd88\ud1b5)\u003c/div\u003e\n    \u003c/div\u003e\n    ",
+  "iconSize": [0, 0],
+  "iconAnchor": [0, 0],
+  "className": "empty",
+});
+        
+    
+                marker_530300858b48fe19b70df4e40a225a1c.setIcon(div_icon_df7eaabdcd4268ec4a690f4e37978781);
+            
+</script>
+</html><script>
+/* ── 자산동 부근 보강: 진입불가 골목 추가 + 교통약자(고령) 밀집 + 범례 (소방서 하늘색 원은 원본 유지) ── */
+(function(){
+  var map = map_d304e3c98314d21d937f682324e55352;
+  var RED = {color:"#DC2626", weight:8, opacity:0.85, lineCap:"round", lineJoin:"round", fill:false};
+  // 자산동 일대 진입불가 골목 가지 추가 (기존 자산/완월동 라인에서 분기)
+  var extra = [
+    [[35.19424,128.563175],[35.193862,128.564050],[35.193520,128.564880]],
+    [[35.193549,128.562392],[35.194050,128.561920],[35.194520,128.561450]],
+    [[35.192976,128.561817],[35.192680,128.560920],[35.192410,128.560100]],
+    [[35.191600,128.564047],[35.191980,128.564920],[35.192410,128.565750]],
+    [[35.190999,128.566526],[35.191520,128.567050],[35.192050,128.567600]],
+    [[35.194240,128.563175],[35.194870,128.563600],[35.195510,128.564050]],
+    [[35.193200,128.563600],[35.193000,128.564400],[35.192800,128.565200]]
+  ];
+  extra.forEach(function(pts){
+    L.polyline(pts, RED).addTo(map).bindTooltip('<div>🚫 자산동 진입불가 골목</div>', {sticky:true});
+  });
+  // 교통약자(고령) 밀집 구역
+  var vc = [35.19335,128.56360];
+  L.circle(vc, {radius:340, color:"#7C3AED", weight:2, dashArray:"5,5", fill:true, fillColor:"#7C3AED", fillOpacity:0.18}).addTo(map)
+    .bindTooltip('<div>👵 교통약자(고령) 밀집 구역</div>', {sticky:true});
+  var dots=[[35.19305,128.56300],[35.19370,128.56420],[35.19280,128.56440],[35.19402,128.56320],[35.19340,128.56255],[35.19255,128.56360],[35.19410,128.56455],[35.19300,128.56500]];
+  dots.forEach(function(c){ L.circleMarker(c,{radius:4,color:"#7C3AED",weight:1,fill:true,fillColor:"#A78BFA",fillOpacity:0.95}).addTo(map); });
+  L.marker(vc, {icon:L.divIcon({html:'<div style="font-family:sans-serif;background:#7C3AED;color:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:bold;white-space:nowrap;transform:translate(-50%,-165%);box-shadow:0 3px 8px rgba(0,0,0,.25)">👵 교통약자(고령) 밀집</div>', iconSize:[0,0], iconAnchor:[0,0], className:"empty"})}).addTo(map);
+  // 자산동 중심으로 보되 소방서 하늘색 원도 함께 보이도록
+  map.setView([35.2015,128.5665], 14);
+  // 범례
+  var lg = L.control({position:"bottomleft"});
+  lg.onAdd = function(){ var d=L.DomUtil.create("div","legend2");
+    d.innerHTML='<div style="font-family:sans-serif;background:rgba(255,255,255,.96);border:1px solid #E2E8F0;border-radius:8px;padding:8px 11px;font-size:11px;line-height:1.95;color:#1E293B;box-shadow:0 3px 8px rgba(0,0,0,.12)">'
+      +'<div><span style="display:inline-block;width:18px;height:0;border-top:3px solid #DC2626;vertical-align:middle;margin-right:6px"></span>소방차 진입불가 골목</div>'
+      +'<div><span style="display:inline-block;width:13px;height:13px;border:2px solid #0288D1;border-radius:50%;background:rgba(2,136,209,.12);vertical-align:middle;margin-right:6px"></span>소방서 관할 반경</div>'
+      +'<div><span style="display:inline-block;width:13px;height:13px;border:2px dashed #7C3AED;border-radius:50%;background:rgba(124,58,237,.18);vertical-align:middle;margin-right:6px"></span>교통약자(고령) 밀집</div>'
+      +'</div>'; return d; };
+  lg.addTo(map);
+})();
+</script>
